@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="7mi-pq-pde">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="7702" systemVersion="14B25" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="7ZF-Yc-f9r">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="7701"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--Login View Controller-->
@@ -75,56 +76,99 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" text="Genie Skin Temperature Experiment!" translatesAutoresizingMaskIntoConstraints="NO" id="ptd-MH-Y4p">
-                                <rect key="frame" x="26" y="172" width="548" height="371"/>
+                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="OOd-RC-RUR">
+                                <rect key="frame" x="41" y="130" width="518" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="IEf-8m-4uO"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eUg-wh-rsF">
+                                <rect key="frame" x="41" y="45" width="110" height="49"/>
+                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="110" id="KHm-q4-sxB"/>
+                                    <constraint firstAttribute="height" constant="49" id="aFj-E2-O6R"/>
+                                </constraints>
+                                <state key="normal" title="IN">
+                                    <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="inButtonPressed:" destination="7ZF-Yc-f9r" eventType="touchUpInside" id="V0q-aV-Vo9"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ghr-zj-2of">
+                                <rect key="frame" x="449" y="45" width="110" height="49"/>
+                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="110" id="BTl-7e-43V"/>
+                                    <constraint firstAttribute="height" constant="49" id="SGp-Ax-Kgm"/>
+                                </constraints>
+                                <state key="normal" title="OUT">
+                                    <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="outButtonPressed:" destination="7ZF-Yc-f9r" eventType="touchUpInside" id="dmP-T2-JcG"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="In" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Zpq-1Q-dL6">
+                                <rect key="frame" x="275" y="175" width="50" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="50" id="ZDV-Ck-3zw"/>
+                                    <constraint firstAttribute="height" constant="21" id="twY-qe-VDe"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" text="Genie Skin Temperature Feedback!" translatesAutoresizingMaskIntoConstraints="NO" id="Ht6-CD-cEZ">
+                                <rect key="frame" x="26" y="242" width="548" height="350"/>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                 <color key="textColor" red="0.0079773027569999995" green="1" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gxv-b7-TPR">
-                                <rect key="frame" x="26" y="101" width="120" height="50"/>
-                                <color key="backgroundColor" red="0.2404370941" green="0.99167351969999995" blue="0.109728038" alpha="1" colorSpace="calibratedRGB"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <state key="normal" title="Start Temp">
-                                    <color key="titleColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                    <color key="titleShadowColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                </state>
-                            </button>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="OOd-RC-RUR">
-                                <rect key="frame" x="26" y="47" width="443" height="30"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits"/>
-                            </textField>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eUg-wh-rsF">
-                                <rect key="frame" x="484" y="37" width="90" height="49"/>
-                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
-                                <state key="normal" title="Add Feeling">
-                                    <color key="titleColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="sFP-w9-tLM">
-                                <rect key="frame" x="454" y="101" width="120" height="50"/>
-                                <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
-                                <state key="normal" title="Stop Temp">
-                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                                    <color key="titleShadowColor" red="1" green="1" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                </state>
-                            </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="eC6-k7-ESU">
-                                <rect key="frame" x="185" y="111" width="152" height="30"/>
-                                <state key="normal" title="AFNetWorkTestButton">
-                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
-                                </state>
-                                <connections>
-                                    <action selector="AFTestButtonPressed:" destination="7ZF-Yc-f9r" eventType="touchUpInside" id="uzN-su-afA"/>
-                                </connections>
-                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="2236" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aVT-LN-nKK">
+                                <rect key="frame" x="275" y="201" width="50" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="21" id="1Tf-Cr-sUI"/>
+                                    <constraint firstAttribute="width" constant="50" id="pIb-es-eMR"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="kOH-Ad-SHg" firstAttribute="top" secondItem="Ht6-CD-cEZ" secondAttribute="bottom" constant="8" id="0NF-1N-zwy"/>
+                            <constraint firstItem="Zpq-1Q-dL6" firstAttribute="top" secondItem="OOd-RC-RUR" secondAttribute="bottom" constant="15" id="BlD-2Z-m9a"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Ht6-CD-cEZ" secondAttribute="trailing" constant="10" id="EsI-PM-VDQ"/>
+                            <constraint firstItem="Ht6-CD-cEZ" firstAttribute="top" secondItem="aVT-LN-nKK" secondAttribute="bottom" constant="20" id="Euv-7j-EhV"/>
+                            <constraint firstItem="eUg-wh-rsF" firstAttribute="leading" secondItem="F0p-wu-Csp" secondAttribute="leadingMargin" constant="25" id="Iat-ln-LiJ"/>
+                            <constraint firstItem="Ghr-zj-2of" firstAttribute="top" secondItem="3Ue-Ne-Dli" secondAttribute="bottom" constant="25" id="QLt-6d-tkw"/>
+                            <constraint firstAttribute="centerX" secondItem="Zpq-1Q-dL6" secondAttribute="centerX" id="Ua2-Vu-Q9S"/>
+                            <constraint firstItem="aVT-LN-nKK" firstAttribute="top" secondItem="Zpq-1Q-dL6" secondAttribute="bottom" constant="5" id="egR-5I-8cS"/>
+                            <constraint firstItem="Ht6-CD-cEZ" firstAttribute="leading" secondItem="F0p-wu-Csp" secondAttribute="leadingMargin" constant="10" id="fUC-Ru-921"/>
+                            <constraint firstAttribute="centerX" secondItem="aVT-LN-nKK" secondAttribute="centerX" id="hPv-mF-bwW"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="OOd-RC-RUR" secondAttribute="trailing" constant="25" id="idO-NR-hKn"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Ghr-zj-2of" secondAttribute="trailing" constant="25" id="lCN-dg-aaH"/>
+                            <constraint firstItem="eUg-wh-rsF" firstAttribute="top" secondItem="3Ue-Ne-Dli" secondAttribute="bottom" constant="25" id="yMz-NA-iw1"/>
+                            <constraint firstItem="OOd-RC-RUR" firstAttribute="top" secondItem="Ghr-zj-2of" secondAttribute="bottom" constant="36" id="ykO-ml-yCg"/>
+                            <constraint firstItem="OOd-RC-RUR" firstAttribute="leading" secondItem="F0p-wu-Csp" secondAttribute="leadingMargin" constant="25" id="zWv-N3-XKW"/>
+                        </constraints>
                     </view>
+                    <connections>
+                        <outlet property="SKTTxtOutput" destination="Ht6-CD-cEZ" id="NCe-nG-7Wf"/>
+                        <outlet property="chooseRoomTextField" destination="OOd-RC-RUR" id="pOM-oE-WF5"/>
+                        <outlet property="inButton" destination="eUg-wh-rsF" id="hqR-ZG-bXs"/>
+                        <outlet property="inOutLabel" destination="Zpq-1Q-dL6" id="fO4-9G-Ppf"/>
+                        <outlet property="outButton" destination="Ghr-zj-2of" id="zi6-FX-e8E"/>
+                        <outlet property="roomNumberLabel" destination="aVT-LN-nKK" id="G0z-MT-FJy"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3c3-dm-Xbp" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
