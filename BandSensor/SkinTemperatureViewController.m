@@ -13,6 +13,10 @@
     NSMutableArray *roomArray;
     UIPickerView *roomPicker;
     
+    NSMutableArray *feelArray;
+    UIPickerView *feelPicker;
+    int feelInt;
+    
     AFHTTPRequestOperationManager *manager;
 }
 @end
@@ -28,11 +32,12 @@
     [self.roomNumberLabel setTextAlignment:NSTextAlignmentCenter];
     
     [self.chooseRoomTextField setBorderStyle:UITextBorderStyleLine];
+    [self.chooseFeelTextField setBorderStyle:UITextBorderStyleLine];
     
     // AFNetWorking Manager setup
     manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:@"https://genie.ucsd.edu"]];
     manager.requestSerializer = [AFJSONRequestSerializer serializer];
-    [manager.requestSerializer setAuthorizationHeaderFieldWithUsername:@"genie.calendar.ucsd@gmail.com" password:@"5056789"];
+    [manager.requestSerializer setAuthorizationHeaderFieldWithUsername:self.username password:self.password];
   
     // Fetch the user's rooms
     roomArray = [[NSMutableArray alloc] init];
@@ -60,6 +65,7 @@
     }];
     
     [self addRoomPicker];
+    [self addFeelPicker];
     
     self.hud = [[MBProgressHUD alloc] init];
     [self.view addSubview:self.hud];
@@ -88,6 +94,16 @@
     //keyboard disappear when tapping outside of text field
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissKeyboard)];
     [self.view addGestureRecognizer:tap];
+    
+    feelArray = [[NSMutableArray alloc] init];
+    [feelArray addObject:@"HOT"];
+    [feelArray addObject:@"WARM"];
+    [feelArray addObject:@"SLIGHTLY WARM"];
+    [feelArray addObject:@"GOOD"];
+    [feelArray addObject:@"SLIGHTLY COOL"];
+    [feelArray addObject:@"COOL"];
+    [feelArray addObject:@"COLD"];
+    
     
 }
 
@@ -131,7 +147,10 @@
 }
 
 - (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent: (NSInteger)component {
-    return roomArray.count;
+    if(pickerView == roomPicker)
+        return roomArray.count;
+    else
+        return feelArray.count;
 }
 
 #pragma mark- Picker View Delegate
@@ -139,14 +158,20 @@
             titleForRow:(NSInteger)row
            forComponent:(NSInteger)component
 {
-    return [roomArray objectAtIndex:row];
+    if(pickerView == roomPicker)
+        return [roomArray objectAtIndex:row];
+    else
+        return [feelArray objectAtIndex:row];;
 }
 
 - (void)pickerView:(UIPickerView *)pickerView
       didSelectRow:(NSInteger)row
        inComponent:(NSInteger)component
 {
-    self.chooseRoomTextField.text = [NSString stringWithFormat:@"%@", [roomArray objectAtIndex:row]];
+    if(pickerView == roomPicker)
+        self.chooseRoomTextField.text = [NSString stringWithFormat:@"%@", [roomArray objectAtIndex:row]];
+    else
+        self.chooseFeelTextField.text = [NSString stringWithFormat:@"%@", [feelArray objectAtIndex:row]];
 }
 
 #pragma mark - add picker helper method
@@ -167,16 +192,44 @@
     UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
     [barItems addObject:flexSpace];
     
-    UIBarButtonItem *doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(pickerDoneClicked)];
+    UIBarButtonItem *doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(pickerDoneClicked1)];
     [barItems addObject:doneBtn];
     
     [mypickerToolbar setItems:barItems animated:YES];
     self.chooseRoomTextField.inputAccessoryView = mypickerToolbar;
 }
 
--(void)pickerDoneClicked
+-(void)pickerDoneClicked1
 {
     [self.chooseRoomTextField resignFirstResponder];
+}
+
+-(void)addFeelPicker
+{
+    feelPicker = [[UIPickerView alloc] initWithFrame:CGRectZero];
+    feelPicker.delegate = self;
+    feelPicker.dataSource = self;
+    [feelPicker setShowsSelectionIndicator:YES];
+    self.chooseFeelTextField.inputView = feelPicker;
+    
+    // Create done button in UIPickerView
+    UIToolbar*  mypickerToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 320, 20)];
+    mypickerToolbar.barStyle = UIBarStyleBlackOpaque;
+    [mypickerToolbar sizeToFit];
+    NSMutableArray *barItems = [[NSMutableArray alloc] init];
+    UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
+    [barItems addObject:flexSpace];
+    
+    UIBarButtonItem *doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(pickerDoneClicked2)];
+    [barItems addObject:doneBtn];
+    
+    [mypickerToolbar setItems:barItems animated:YES];
+    self.chooseFeelTextField.inputAccessoryView = mypickerToolbar;
+}
+
+-(void)pickerDoneClicked2
+{
+    [self.chooseFeelTextField resignFirstResponder];
 }
 
 - (void)output:(NSString *)message
@@ -205,7 +258,7 @@
     self.roomNumberLabel.text = self.chooseRoomTextField.text;
     
     // Post the data to Genie
-    [manager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    [manager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":self.chooseRoomTextField.text} success:^(AFHTTPRequestOperation *operation, id responseObject) {
 //        NSLog(@"JSON: %@", responseObject);
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
                                                         message:@"Set status as IN the room"
@@ -249,6 +302,15 @@
             } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
                 [self output:[NSString stringWithFormat:@"Error: %@", error]];
             }];
+            
+            // Post data to Genie persistent skin temperature database, testing purpose only
+            [manager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                NSLog(@"Success: %@",responseObject);
+                
+            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                NSLog(@"Posting to Testing database %@", error.description);
+            }];
+            
         }];
         
         [self.client.sensorManager startBandContactUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorBandContactData *contactData, NSError *error) {
@@ -292,7 +354,51 @@
     
     self.inOutLabel.text = @"OUT";
     self.roomNumberLabel.text = @"";
-    
 }
+
+- (IBAction)addFeelButtonPressed:(UIButton *)sender {
+    if([self.chooseFeelTextField.text isEqualToString:@""])
+    {
+        feelInt = -1;
+    }
+    else if([self.chooseFeelTextField.text isEqualToString:@"HOT"])
+    {
+        feelInt = 0;
+    }
+    else if([self.chooseFeelTextField.text isEqualToString:@"WARM"])
+    {
+        feelInt = 1;
+    }
+    else if([self.chooseFeelTextField.text isEqualToString:@"SLIGHTLY WARM"])
+    {
+        feelInt = 2;
+    }
+    else if([self.chooseFeelTextField.text isEqualToString:@"GOOD"])
+    {
+        feelInt = 3;
+    }
+    else if([self.chooseFeelTextField.text isEqualToString:@"SLIGHTLY COOL"])
+    {
+        feelInt = 4;
+    }
+    else if([self.chooseFeelTextField.text isEqualToString:@"COOL"])
+    {
+        feelInt = 5;
+    }
+    else if([self.chooseFeelTextField.text isEqualToString:@"COLD"])
+    {
+        feelInt = 6;
+    }
+    
+    NSString *alertMessage = [@"You just set your feeling to " stringByAppendingString:self.chooseFeelTextField.text];
+    
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                    message:alertMessage
+                                                   delegate:nil
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+    [alert show];
+}
+
 
 @end

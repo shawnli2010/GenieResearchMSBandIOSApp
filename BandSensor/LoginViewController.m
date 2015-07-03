@@ -16,7 +16,15 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    // Do any additional setup after loading the view
+    
+    [self.passwordTextField setSecureTextEntry:YES];
+    
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissKeyboard)];
+    [self.view addGestureRecognizer:tap];
+    
+    // prevent the touch event to the table view being eaten by the tap
+    [tap setCancelsTouchesInView:NO];
 }
 
 - (void)didReceiveMemoryWarning {
@@ -24,14 +32,33 @@
     // Dispose of any resources that can be recreated.
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (IBAction)loginButtonPressed:(UIButton *)sender {
+    if([self.usernameTextField.text isEqualToString:@""] || [self.passwordTextField.text isEqualToString:@""] )
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                        message:@"No input field should be blank"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    }
+    [self performSegueWithIdentifier:@"loginSegue" sender:self];
 }
-*/
+
+-(void)dismissKeyboard {
+    [self.view endEditing:YES];
+}
+
+#pragma mark - Navigation
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
+    if([segue.identifier isEqualToString:@"loginSegue"])
+    {
+        SkinTemperatureViewController *controller = (SkinTemperatureViewController *)segue.destinationViewController;
+        controller.username = self.usernameTextField.text;
+        controller.password = self.passwordTextField.text;
+    }
+    
+}
+
 
 @end

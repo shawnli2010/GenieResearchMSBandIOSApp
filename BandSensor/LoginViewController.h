@@ -7,7 +7,10 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "SkinTemperatureViewController.h"
 
 @interface LoginViewController : UIViewController
+@property (weak, nonatomic) IBOutlet UITextField *usernameTextField;
+@property (weak, nonatomic) IBOutlet UITextField *passwordTextField;
 
 @end

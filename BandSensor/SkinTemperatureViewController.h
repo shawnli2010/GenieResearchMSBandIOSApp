@@ -21,12 +21,17 @@
 @property (weak, nonatomic) IBOutlet UITextView *SKTTxtOutput;
 
 
+@property (weak, nonatomic) IBOutlet UIButton *addFeelButton;
 
 @property (weak, nonatomic) IBOutlet UIButton *inButton;
 @property (weak, nonatomic) IBOutlet UIButton *outButton;
 @property (weak, nonatomic) IBOutlet UITextField *chooseRoomTextField;
+@property (weak, nonatomic) IBOutlet UITextField *chooseFeelTextField;
 
 @property (weak, nonatomic) IBOutlet UILabel *inOutLabel;
 @property (weak, nonatomic) IBOutlet UILabel *roomNumberLabel;
+
+@property(nonatomic) NSString *username;
+@property(nonatomic) NSString *password;
 
 @end
