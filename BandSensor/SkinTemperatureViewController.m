@@ -7,6 +7,7 @@
 //
 
 #import "SkinTemperatureViewController.h"
+#import "AppDelegate.h"
 
 @interface SkinTemperatureViewController ()
 {
@@ -26,6 +27,19 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    self.RPKmanager = [RPKManager managerWithDelegate:self];
+    //    [self.RPKmanager start];       
+    
+    /************************************************** Get the app start time *****************************************/
+    NSDate *currentTime = [NSDate date];
+    // Convert the time to local time zone
+    NSTimeInterval timeZoneSeconds = [[NSTimeZone localTimeZone] secondsFromGMT];
+    currentTime = [currentTime dateByAddingTimeInterval:timeZoneSeconds];
+    
+    NSString *startString = [NSString stringWithFormat:@"App Starts at %@", currentTime];
+    [self output:startString];
+    /************************************************** Get the app start time *****************************************/    
+    
     self.inOutLabel.text = @"OUT";
     self.roomNumberLabel.text = @"";
     [self.inOutLabel setTextAlignment:NSTextAlignmentCenter];
@@ -34,45 +48,6 @@
     [self.chooseRoomTextField setBorderStyle:UITextBorderStyleLine];
     [self.chooseFeelTextField setBorderStyle:UITextBorderStyleLine];
     
-    // AFNetWorking Manager setup
-    manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:@"https://genie.ucsd.edu"]];
-    manager.requestSerializer = [AFJSONRequestSerializer serializer];
-    [manager.requestSerializer setAuthorizationHeaderFieldWithUsername:self.username password:self.password];
-  
-    // Fetch the user's rooms
-    roomArray = [[NSMutableArray alloc] init];
-    [roomArray addObject:@""];
-    
-    // Get the rooms of this user
-    // Post the data to Genie
-    [manager GET:@"https://genie.ucsd.edu/api/v1/users/" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        
-        int i = 0;
-        for(NSString *roomNumber in responseObject[@"rooms"])
-        {
-            [roomArray addObject:responseObject[@"rooms"][i][@"room"]];
-            i++;
-        }
-        
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        [self output:[NSString stringWithFormat:@"Error: %@", error]];
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                        message:@"Failed to fetch rooms for the user"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    }];
-    
-    [self addRoomPicker];
-    [self addFeelPicker];
-    
-    self.hud = [[MBProgressHUD alloc] init];
-    [self.view addSubview:self.hud];
-    self.hud.labelText = @"Connecting to the band...";
-    self.hud.yOffset = -100;
-    [self.hud show:YES];
-
     // Microsoft Band Manager setup
     [MSBClientManager sharedManager].delegate = self;
     NSArray	*clients = [[MSBClientManager sharedManager] attachedClients];
@@ -86,10 +61,59 @@
                                               cancelButtonTitle:@"OK"
                                               otherButtonTitles:nil];
         [alert show];
-        return;
     }
-
+    
     [[MSBClientManager sharedManager] connectClient:_client];
+    
+    // AFNetWorking Manager setup
+    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
+    /************************************************************************************************************************/
+//    manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:@"https://genie.ucsd.edu"]];
+//    manager.requestSerializer = [AFJSONRequestSerializer serializer];
+//    [manager.requestSerializer setAuthorizationHeaderFieldWithUsername:self.username password:self.password];
+    /************************************************************************************************************************/
+  
+    // Fetch the user's rooms
+    roomArray = [[NSMutableArray alloc] init];
+    [roomArray addObject:@""];
+    
+    /*****************************TTTTTTTTT****************************************/
+    [roomArray addObject:@"2236"];
+    [roomArray addObject:@"2238"];
+    /*****************************TTTTTTTTT****************************************/
+    
+    // Get the rooms of this user
+    // Post the data to Genie
+    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
+    /************************************************************************************************************************/
+//    [manager GET:@"https://genie.ucsd.edu/api/v1/users/" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//        
+//        int i = 0;
+//        for(NSString *roomNumber in responseObject[@"rooms"])
+//        {
+//            [roomArray addObject:responseObject[@"rooms"][i][@"room"]];
+//            i++;
+//        }
+//        
+//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//        [self output:[NSString stringWithFormat:@"Error: %@", error]];
+//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+//                                                        message:@"Failed to fetch rooms for the user"
+//                                                       delegate:nil
+//                                              cancelButtonTitle:@"OK"
+//                                              otherButtonTitles:nil];
+//        [alert show];
+//    }];
+    /************************************************************************************************************************/
+    
+    [self addRoomPicker];
+    [self addFeelPicker];
+    
+    self.hud = [[MBProgressHUD alloc] init];
+    [self.view addSubview:self.hud];
+    self.hud.labelText = @"Connecting to the band...";
+    self.hud.yOffset = -100;
+    [self.hud show:YES];
     
     //keyboard disappear when tapping outside of text field
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissKeyboard)];
@@ -103,8 +127,6 @@
     [feelArray addObject:@"SLIGHTLY COOL"];
     [feelArray addObject:@"COOL"];
     [feelArray addObject:@"COLD"];
-    
-    
 }
 
 - (void)didReceiveMemoryWarning {
@@ -115,29 +137,6 @@
 # pragma mark - dismissKeyboard
 -(void)dismissKeyboard {
     [self.view endEditing:YES];
-}
-
-#pragma mark - Client Manager Delegates
-
-- (void)clientManager:(MSBClientManager *)clientManager clientDidConnect:(MSBClient *)client
-{
-    [self.hud hide:YES];
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                    message:@"Band connected!"
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-    [alert show];
-}
-
-- (void)clientManager:(MSBClientManager *)clientManager clientDidDisconnect:(MSBClient *)client
-{
-    [self output:@"in ConnectedViewController disconnected"];
-}
-
-- (void)clientManager:(MSBClientManager *)clientManager client:(MSBClient *)client didFailToConnectWithError:(NSError *)error
-{
-    [self output:@"in ConnectedViewController failed to connect to band"];
 }
 
 /*************************************************************************************/
@@ -257,24 +256,36 @@
     self.inOutLabel.text = @"IN";
     self.roomNumberLabel.text = self.chooseRoomTextField.text;
     
+    /*****************************TTTTTTTTT****************************************/
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                    message:@"Set status as IN the room"
+                                                   delegate:nil
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+    [alert show];
+    /*****************************TTTTTTTTT****************************************/
+    
     // Post the data to Genie
-    [manager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":self.chooseRoomTextField.text} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-//        NSLog(@"JSON: %@", responseObject);
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                        message:@"Set status as IN the room"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        [self output:[NSString stringWithFormat:@"Error: %@", error]];
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                        message:@"Failed to set in/out status"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    }];
+    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
+    /************************************************************************************************************************/
+//    [manager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":self.chooseRoomTextField.text} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+////        NSLog(@"JSON: %@", responseObject);
+//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+//                                                        message:@"Set status as IN the room"
+//                                                       delegate:nil
+//                                              cancelButtonTitle:@"OK"
+//                                              otherButtonTitles:nil];
+//        [alert show];
+//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//        [self output:[NSString stringWithFormat:@"Error: %@", error]];
+//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+//                                                        message:@"Failed to set in/out status"
+//                                                       delegate:nil
+//                                              cancelButtonTitle:@"OK"
+//                                              otherButtonTitles:nil];
+//        [alert show];
+//    }];
+    /************************************************************************************************************************/
     
     // Start the band's skin temperature detecting
     if (self.client && self.client.isDeviceConnected)
@@ -288,28 +299,42 @@
             // Create the Json Object for skin temperature
             NSString *tempString = [NSString stringWithFormat:@"%f", fTemp];
             
-            // Post the data to Genie
-            [manager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                
-                NSDate *date = [NSDate date];
-                NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-                [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
-                NSString *string2 = [formatter stringFromDate:date];
-                
-                NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
-                [self output:outString];
-                
-            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                [self output:[NSString stringWithFormat:@"Error: %@", error]];
-            }];
+            /*****************************TTTTTTTTT****************************************/
+            NSDate *date = [NSDate date];
+            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+            NSString *string2 = [formatter stringFromDate:date];
             
-            // Post data to Genie persistent skin temperature database, testing purpose only
-            [manager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                NSLog(@"Success: %@",responseObject);
-                
-            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                NSLog(@"Posting to Testing database %@", error.description);
-            }];
+            NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
+            [self output:outString];
+            /*****************************TTTTTTTTT****************************************/
+            
+            
+            // Post the data to Genie
+            // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
+            /************************************************************************************************************************/
+//            [manager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//                
+//                NSDate *date = [NSDate date];
+//                NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+//                [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+//                NSString *string2 = [formatter stringFromDate:date];
+//                
+//                NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
+//                [self output:outString];
+//                
+//            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//                [self output:[NSString stringWithFormat:@"Error: %@", error]];
+//            }];
+//            
+//            // Post data to Genie persistent skin temperature database, testing purpose only
+//            [manager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//                NSLog(@"Success: %@",responseObject);
+//                
+//            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//                NSLog(@"Posting to Testing database %@", error.description);
+//            }];
+            /************************************************************************************************************************/
             
         }];
         
@@ -331,23 +356,37 @@
 
 - (IBAction)outButtonPressed:(UIButton *)sender {
     // Post the data to Genie
-    [manager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/out" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        NSLog(@"JSON: %@", responseObject);
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                        message:@"Set status as OUT of the room"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        [self output:[NSString stringWithFormat:@"Error: %@", error]];
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                        message:@"Failed to set in/out status"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    }];
+    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
+    /************************************************************************************************************************/
+//    [manager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/out" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//        NSLog(@"JSON: %@", responseObject);
+//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+//                                                        message:@"Set status as OUT of the room"
+//                                                       delegate:nil
+//                                              cancelButtonTitle:@"OK"
+//                                              otherButtonTitles:nil];
+//        [alert show];
+//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+//        [self output:[NSString stringWithFormat:@"Error: %@", error]];
+//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+//                                                        message:@"Failed to set in/out status"
+//                                                       delegate:nil
+//                                              cancelButtonTitle:@"OK"
+//                                              otherButtonTitles:nil];
+//        [alert show];
+//    }];
+    /************************************************************************************************************************/
+
+    
+    /*****************************TTTTTTTTT****************************************/
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                    message:@"Set status as OUT of the room"
+                                                   delegate:nil
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+    [alert show];
+    /*****************************TTTTTTTTT****************************************/
+
     
     [self output:@"Stop temperature detection"];
     [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
@@ -398,6 +437,206 @@
                                           cancelButtonTitle:@"OK"
                                           otherButtonTitles:nil];
     [alert show];
+}
+
+#pragma mark - Client Manager Delegates
+
+- (void)clientManager:(MSBClientManager *)clientManager clientDidConnect:(MSBClient *)client
+{
+    [self.hud hide:YES];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                    message:@"Band connected!"
+                                                   delegate:nil
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+    [alert show];
+}
+
+- (void)clientManager:(MSBClientManager *)clientManager clientDidDisconnect:(MSBClient *)client
+{
+        [self output:@"in ConnectedViewController disconnected"];
+}
+
+- (void)clientManager:(MSBClientManager *)clientManager client:(MSBClient *)client didFailToConnectWithError:(NSError *)error
+{
+        [self output:@"in ConnectedViewController failed to connect to band"];
+}
+
+#pragma mark Proximity Kit Delegate Methods
+
+- (void)proximityKitDidSync:(RPKManager *)manager {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self output:@"Did Sync"];
+    });
+    NSLog(@"Did Sync");
+    
+}
+- (void)proximityKit:(RPKManager *)manager didEnter:(RPKRegion*)region {
+    NSLog(@"Entered Region %@ (%@)", region.name, region.identifier);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"Entered Region %@ (%@)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", region.name, region.identifier];
+        [self output:message];
+        
+        self.inOutLabel.text = @"IN";
+        self.roomNumberLabel.text = self.chooseRoomTextField.text;
+    });
+    
+    /*****************************TTTTTTTTT****************************************/
+    self.chooseRoomTextField.text = @"2236";
+    /*****************************TTTTTTTTT****************************************/
+    
+    if([self.chooseRoomTextField.text isEqualToString:@""])
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                        message:@"Please choose your room number"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+        return;
+    }
+    
+    /*****************************TTTTTTTTT****************************************/
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                    message:@"Set status as IN the room"
+                                                   delegate:nil
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+    [alert show];
+    /*****************************TTTTTTTTT****************************************/
+    
+    // Start the band's skin temperature detecting
+    if (self.client && self.client.isDeviceConnected)
+    {
+        [self output:@"Starting skin temperature updates..."];
+        [self.client.sensorManager startSkinTempUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorSkinTempData *skinTemperatureData, NSError *error) {
+            
+            // Convert c to f
+            double fTemp = skinTemperatureData.temperature * (9.0/5.0) + 32;
+            
+            // Create the Json Object for skin temperature
+            NSString *tempString = [NSString stringWithFormat:@"%f", fTemp];
+            
+            /*****************************TTTTTTTTT****************************************/
+            NSDate *date = [NSDate date];
+            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+            NSString *string2 = [formatter stringFromDate:date];
+            
+            NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
+            [self output:outString];
+            /*****************************TTTTTTTTT****************************************/
+            
+            
+            // Post the data to Genie
+            // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
+            /************************************************************************************************************************/
+            //            [manager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            //
+            //                NSDate *date = [NSDate date];
+            //                NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            //                [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+            //                NSString *string2 = [formatter stringFromDate:date];
+            //
+            //                NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
+            //                [self output:outString];
+            //
+            //            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            //                [self output:[NSString stringWithFormat:@"Error: %@", error]];
+            //            }];
+            //
+            //            // Post data to Genie persistent skin temperature database, testing purpose only
+            //            [manager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            //                NSLog(@"Success: %@",responseObject);
+            //
+            //            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            //                NSLog(@"Posting to Testing database %@", error.description);
+            //            }];
+            /************************************************************************************************************************/
+            
+        }];
+        
+        [self.client.sensorManager startBandContactUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorBandContactData *contactData, NSError *error) {
+            NSString *myString = [NSString stringWithFormat:@"Wear State, %d", (int)(contactData.wornState)];
+            NSDate *date = [NSDate date];
+            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+            [formatter setDateFormat:@"%hh:%mm:%ss"];
+            NSString *timeString = [formatter stringFromDate:date];
+            NSString* outString = [NSString stringWithFormat:@"%@, %@", myString, timeString];
+            NSLog(@"%@",outString);
+        }];
+    }
+    else
+    {
+        [self output:@"Band is not connected. Please wait...."];
+    }
+}
+
+- (void)proximityKit:(RPKManager *)manager didExit:(RPKRegion *)region {
+    NSLog(@"Exited Region %@ (%@)", region.name, region.identifier);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"Exited Region %@ (%@)*****************************************************************", region.name, region.identifier];
+        [self output:message];
+        
+        self.inOutLabel.text = @"OUT";
+        self.roomNumberLabel.text = @"";
+    });
+    
+    /*****************************TTTTTTTTT****************************************/
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                    message:@"Set status as OUT the room"
+                                                   delegate:nil
+                                          cancelButtonTitle:@"OK"
+                                          otherButtonTitles:nil];
+    [alert show];
+    /*****************************TTTTTTTTT****************************************/
+    
+    [self output:@"Stop temperature detection"];
+    [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
+}
+
+- (void)proximityKit:(RPKManager *)manager didRangeBeacons:(NSArray *)beacons inRegion:(RPKBeacon *)region
+{
+    for (RPKBeacon *beacon in beacons) {
+        NSLog(@"Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi];
+            [self output:message];
+        });
+    }
+}
+
+- (void)proximityKit:(RPKManager *)manager didDetermineState:(RPKRegionState)state forRegion:(RPKRegion *)region
+{
+    
+    if (state == RPKRegionStateInside) {
+        NSLog(@"State Changed: inside region %@ (%@)", region.name, region.identifier);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"State Changed: inside region %@ (%@)", region.name, region.identifier];
+            [self output:message];
+        });
+    } else if (state == RPKRegionStateOutside) {
+        NSLog(@"State Changed: outside region %@ (%@)", region.name, region.identifier);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"State Changed: outside region %@ (%@)", region.name, region.identifier];
+            [self output:message];
+        });
+    } else if (state == RPKRegionStateUnknown) {
+        NSLog(@"State Changed: unknown region %@ (%@)", region.name, region.identifier);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"State Changed: unknown region %@ (%@)", region.name, region.identifier];
+            [self output:message];
+        });
+    }
+}
+
+- (void)proximityKit:(RPKManager *)manager didFailWithError:(NSError *)error
+{
+    NSLog(@"Error: %@", error.description);
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"Error: %@", error.description];
+        [self output:message];
+    });
 }
 
 

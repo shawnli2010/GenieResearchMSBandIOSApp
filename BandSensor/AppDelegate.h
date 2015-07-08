@@ -22,10 +22,19 @@
  * ------------------------------------------------------------------------------------------------*/
 
 #import <UIKit/UIKit.h>
+#import <ProximityKit/ProximityKit.h>
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+#import <MicrosoftBandKit_iOS/MicrosoftBandKit_iOS.h>
+#import "KeychainItemWrapper.h"
+#import "MBProgressHUD.h"
+
+
+@interface AppDelegate : UIResponder <UIApplicationDelegate, MSBClientManagerDelegate,RPKManagerDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
+@property (nonatomic, weak) MSBClient *client;
+@property (nonatomic, strong) MBProgressHUD *hud;
+
 
 
 @end

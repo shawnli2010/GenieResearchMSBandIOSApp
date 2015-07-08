@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "SkinTemperatureViewController.h"
+#import "KeychainItemWrapper.h"
 
 @interface LoginViewController : UIViewController
 @property (weak, nonatomic) IBOutlet UITextField *usernameTextField;

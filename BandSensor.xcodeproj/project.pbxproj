@@ -9,6 +9,14 @@
 /* Begin PBXBuildFile section */
 		4205EF4C1B00088100DB0D37 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4205EF4B1B00088100DB0D37 /* LoginViewController.m */; };
 		4205EF4F1B000AF200DB0D37 /* SkinTemperatureViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4205EF4E1B000AF200DB0D37 /* SkinTemperatureViewController.m */; };
+		4228AFFE1B4AD4A600376EF8 /* ProximityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228AFFD1B4AD4A600376EF8 /* ProximityKit.framework */; };
+		4228B0001B4AD4D000376EF8 /* ProximityKit.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4228AFFF1B4AD4D000376EF8 /* ProximityKit.plist */; };
+		4228B0021B4AD4F100376EF8 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228B0011B4AD4F100376EF8 /* libsqlite3.dylib */; };
+		4228B0041B4AD4FC00376EF8 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228B0031B4AD4FC00376EF8 /* CoreGraphics.framework */; };
+		4228B0061B4AD50400376EF8 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228B0051B4AD50400376EF8 /* UIKit.framework */; };
+		4228B0081B4AD50C00376EF8 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228B0071B4AD50C00376EF8 /* Foundation.framework */; };
+		4228B00A1B4AD9F700376EF8 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228B0091B4AD9F700376EF8 /* Security.framework */; };
+		4228B00D1B4ADB7600376EF8 /* KeychainItemWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = 4228B00C1B4ADB7600376EF8 /* KeychainItemWrapper.m */; };
 		42BA43D21B093ECE00F13EF6 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 42BA43D11B093ECE00F13EF6 /* MBProgressHUD.m */; };
 		5F598E4F1AA635E80071C70E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F598E4E1AA635E80071C70E /* main.m */; };
 		5F598E521AA635E80071C70E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F598E511AA635E80071C70E /* AppDelegate.m */; };
@@ -27,6 +35,15 @@
 		4205EF4B1B00088100DB0D37 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		4205EF4D1B000AF200DB0D37 /* SkinTemperatureViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SkinTemperatureViewController.h; sourceTree = "<group>"; };
 		4205EF4E1B000AF200DB0D37 /* SkinTemperatureViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SkinTemperatureViewController.m; sourceTree = "<group>"; };
+		4228AFFD1B4AD4A600376EF8 /* ProximityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ProximityKit.framework; sourceTree = "<group>"; };
+		4228AFFF1B4AD4D000376EF8 /* ProximityKit.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = ProximityKit.plist; sourceTree = "<group>"; };
+		4228B0011B4AD4F100376EF8 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
+		4228B0031B4AD4FC00376EF8 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		4228B0051B4AD50400376EF8 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		4228B0071B4AD50C00376EF8 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		4228B0091B4AD9F700376EF8 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		4228B00B1B4ADB7600376EF8 /* KeychainItemWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeychainItemWrapper.h; sourceTree = "<group>"; };
+		4228B00C1B4ADB7600376EF8 /* KeychainItemWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KeychainItemWrapper.m; sourceTree = "<group>"; };
 		42BA43D01B093ECE00F13EF6 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		42BA43D11B093ECE00F13EF6 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		5F598E491AA635E80071C70E /* BandSensor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BandSensor.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -47,9 +64,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4228B00A1B4AD9F700376EF8 /* Security.framework in Frameworks */,
+				4228B0081B4AD50C00376EF8 /* Foundation.framework in Frameworks */,
+				4228B0061B4AD50400376EF8 /* UIKit.framework in Frameworks */,
+				4228B0041B4AD4FC00376EF8 /* CoreGraphics.framework in Frameworks */,
+				4228B0021B4AD4F100376EF8 /* libsqlite3.dylib in Frameworks */,
 				5F598E751AA6366C0071C70E /* MicrosoftBandKit_iOS.framework in Frameworks */,
 				5F598E731AA636600071C70E /* CoreBluetooth.framework in Frameworks */,
 				C24870B29637BE86CE2CAD3A /* libPods.a in Frameworks */,
+				4228AFFE1B4AD4A600376EF8 /* ProximityKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +82,8 @@
 		42BA43CF1B093EAB00F13EF6 /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				4228B00B1B4ADB7600376EF8 /* KeychainItemWrapper.h */,
+				4228B00C1B4ADB7600376EF8 /* KeychainItemWrapper.m */,
 				42BA43D01B093ECE00F13EF6 /* MBProgressHUD.h */,
 				42BA43D11B093ECE00F13EF6 /* MBProgressHUD.m */,
 			);
@@ -68,7 +93,13 @@
 		514EDD8F30FEA367C69C17B1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4228B0091B4AD9F700376EF8 /* Security.framework */,
+				4228B0071B4AD50C00376EF8 /* Foundation.framework */,
+				4228B0051B4AD50400376EF8 /* UIKit.framework */,
+				4228B0031B4AD4FC00376EF8 /* CoreGraphics.framework */,
+				4228B0011B4AD4F100376EF8 /* libsqlite3.dylib */,
 				2C3FAD8FED4B2B8AE53C4CC0 /* libPods.a */,
+				4228AFFD1B4AD4A600376EF8 /* ProximityKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -95,6 +126,7 @@
 		5F598E4B1AA635E80071C70E /* BandSensor */ = {
 			isa = PBXGroup;
 			children = (
+				4228AFFF1B4AD4D000376EF8 /* ProximityKit.plist */,
 				42BA43CF1B093EAB00F13EF6 /* Vendor */,
 				5F598E501AA635E80071C70E /* AppDelegate.h */,
 				5F598E511AA635E80071C70E /* AppDelegate.m */,
@@ -203,6 +235,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				5F598E581AA635E80071C70E /* Main.storyboard in Resources */,
+				4228B0001B4AD4D000376EF8 /* ProximityKit.plist in Resources */,
 				5F598E5D1AA635E80071C70E /* LaunchScreen.xib in Resources */,
 				5F598E5A1AA635E80071C70E /* Images.xcassets in Resources */,
 			);
@@ -250,6 +283,7 @@
 			files = (
 				4205EF4F1B000AF200DB0D37 /* SkinTemperatureViewController.m in Sources */,
 				4205EF4C1B00088100DB0D37 /* LoginViewController.m in Sources */,
+				4228B00D1B4ADB7600376EF8 /* KeychainItemWrapper.m in Sources */,
 				42BA43D21B093ECE00F13EF6 /* MBProgressHUD.m in Sources */,
 				5F598E521AA635E80071C70E /* AppDelegate.m in Sources */,
 				5F598E4F1AA635E80071C70E /* main.m in Sources */,
@@ -361,7 +395,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				FRAMEWORK_SEARCH_PATHS = "${SRCROOT}/../";
+				FRAMEWORK_SEARCH_PATHS = (
+					"${SRCROOT}/../",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = BandSensor/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -377,7 +414,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				FRAMEWORK_SEARCH_PATHS = "${SRCROOT}/../";
+				FRAMEWORK_SEARCH_PATHS = (
+					"${SRCROOT}/../",
+					"$(PROJECT_DIR)",
+				);
 				INFOPLIST_FILE = BandSensor/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

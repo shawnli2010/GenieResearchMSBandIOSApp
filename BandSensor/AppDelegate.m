@@ -32,6 +32,18 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    
+    
+    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
+    // Cannot test this auto-login functionality because genie.ucsd.edu is down for now
+    /************************************************************************/
+    KeychainItemWrapper* keychain = [[KeychainItemWrapper alloc] initWithIdentifier:@"Keychain" accessGroup:nil];
+    [keychain setObject:(__bridge id)(kSecAttrAccessibleWhenUnlocked) forKey:(__bridge id)(kSecAttrAccessible)];
+    NSString *username = [keychain objectForKey:(__bridge id)(kSecAttrAccount)];
+    NSString *password = [keychain objectForKey:(__bridge id)(kSecValueData)];
+    keychain = nil;
+    /************************************************************************/
+
     return YES;
 }
 
@@ -56,5 +68,6 @@
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
+
 
 @end
