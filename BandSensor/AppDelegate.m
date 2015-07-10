@@ -23,6 +23,10 @@
 
 #import "AppDelegate.h"
 
+// declare global variable for push notification recurrence minutes
+BOOL pushNotificationIsOn;
+BOOL pushNotificationAlreadyOn;
+
 @interface AppDelegate ()
 
 @end
@@ -33,15 +37,22 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     
+    pushNotificationAlreadyOn = false;
+    pushNotificationIsOn = false;
     
-    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
-    // Cannot test this auto-login functionality because genie.ucsd.edu is down for now
+    if ([UIApplication instancesRespondToSelector:@selector(registerUserNotificationSettings:)])
+    {
+        [[UIApplication sharedApplication] registerUserNotificationSettings:
+         [UIUserNotificationSettings settingsForTypes:UIUserNotificationTypeAlert|UIUserNotificationTypeSound|UIUserNotificationTypeBadge
+                                           categories:nil]];
+    }
+    
     /************************************************************************/
-    KeychainItemWrapper* keychain = [[KeychainItemWrapper alloc] initWithIdentifier:@"Keychain" accessGroup:nil];
-    [keychain setObject:(__bridge id)(kSecAttrAccessibleWhenUnlocked) forKey:(__bridge id)(kSecAttrAccessible)];
-    NSString *username = [keychain objectForKey:(__bridge id)(kSecAttrAccount)];
-    NSString *password = [keychain objectForKey:(__bridge id)(kSecValueData)];
-    keychain = nil;
+//    KeychainItemWrapper* keychain = [[KeychainItemWrapper alloc] initWithIdentifier:@"Keychain" accessGroup:nil];
+//    [keychain setObject:(__bridge id)(kSecAttrAccessibleWhenUnlocked) forKey:(__bridge id)(kSecAttrAccessible)];
+//    NSString *username = [keychain objectForKey:(__bridge id)(kSecAttrAccount)];
+//    NSString *password = [keychain objectForKey:(__bridge id)(kSecValueData)];
+//    keychain = nil;
     /************************************************************************/
 
     return YES;

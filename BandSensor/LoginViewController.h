@@ -7,7 +7,8 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "SkinTemperatureViewController.h"
+#import "HVACControllViewController.h"
+#import "CollectDataViewController.h"
 #import "KeychainItemWrapper.h"
 
 @interface LoginViewController : UIViewController

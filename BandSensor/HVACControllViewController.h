@@ -14,7 +14,7 @@
 #import "MBProgressHUD.h"
 
 
-@interface SkinTemperatureViewController : UIViewController <MSBClientManagerDelegate,UIPickerViewDataSource,UIPickerViewDelegate,RPKManagerDelegate>
+@interface HVACControllViewController : UIViewController <MSBClientManagerDelegate,UIPickerViewDataSource,UIPickerViewDelegate,RPKManagerDelegate>
 
 
 // Skin temperature output

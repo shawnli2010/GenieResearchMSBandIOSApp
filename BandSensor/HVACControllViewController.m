@@ -6,10 +6,10 @@
 //
 //
 
-#import "SkinTemperatureViewController.h"
+#import "HVACControllViewController.h"
 #import "AppDelegate.h"
 
-@interface SkinTemperatureViewController ()
+@interface HVACControllViewController ()
 {
     NSMutableArray *roomArray;
     UIPickerView *roomPicker;
@@ -18,11 +18,11 @@
     UIPickerView *feelPicker;
     int feelInt;
     
-    AFHTTPRequestOperationManager *manager;
+    AFHTTPRequestOperationManager *AFManager;
 }
 @end
 
-@implementation SkinTemperatureViewController
+@implementation HVACControllViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -66,45 +66,36 @@
     [[MSBClientManager sharedManager] connectClient:_client];
     
     // AFNetWorking Manager setup
-    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
-    /************************************************************************************************************************/
-//    manager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:@"https://genie.ucsd.edu"]];
-//    manager.requestSerializer = [AFJSONRequestSerializer serializer];
-//    [manager.requestSerializer setAuthorizationHeaderFieldWithUsername:self.username password:self.password];
-    /************************************************************************************************************************/
+    AFManager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:@"https://genie.ucsd.edu"]];
+    AFManager.requestSerializer = [AFJSONRequestSerializer serializer];
+    [AFManager.requestSerializer setAuthorizationHeaderFieldWithUsername:self.username password:self.password];
+
   
     // Fetch the user's rooms
     roomArray = [[NSMutableArray alloc] init];
     [roomArray addObject:@""];
-    
-    /*****************************TTTTTTTTT****************************************/
-    [roomArray addObject:@"2236"];
-    [roomArray addObject:@"2238"];
-    /*****************************TTTTTTTTT****************************************/
+
     
     // Get the rooms of this user
     // Post the data to Genie
-    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
-    /************************************************************************************************************************/
-//    [manager GET:@"https://genie.ucsd.edu/api/v1/users/" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-//        
-//        int i = 0;
-//        for(NSString *roomNumber in responseObject[@"rooms"])
-//        {
-//            [roomArray addObject:responseObject[@"rooms"][i][@"room"]];
-//            i++;
-//        }
-//        
-//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-//        [self output:[NSString stringWithFormat:@"Error: %@", error]];
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-//                                                        message:@"Failed to fetch rooms for the user"
-//                                                       delegate:nil
-//                                              cancelButtonTitle:@"OK"
-//                                              otherButtonTitles:nil];
-//        [alert show];
-//    }];
-    /************************************************************************************************************************/
+    [AFManager GET:@"https://genie.ucsd.edu/api/v1/users/" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        
+        int i = 0;
+        for(NSString *roomNumber in responseObject[@"rooms"])
+        {
+            [roomArray addObject:responseObject[@"rooms"][i][@"room"]];
+            i++;
+        }
+        
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        [self output:[NSString stringWithFormat:@"Error: %@", error]];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                        message:@"Failed to fetch rooms for the user"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    }];
     
     [self addRoomPicker];
     [self addFeelPicker];
@@ -129,10 +120,6 @@
     [feelArray addObject:@"COLD"];
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
 
 # pragma mark - dismissKeyboard
 -(void)dismissKeyboard {
@@ -231,6 +218,8 @@
     [self.chooseFeelTextField resignFirstResponder];
 }
 
+#pragma mark - helper method, log information to the TextView console in the app
+
 - (void)output:(NSString *)message
 {
     self.SKTTxtOutput.text = [NSString stringWithFormat:@"%@\n%@", self.SKTTxtOutput.text, message];
@@ -256,36 +245,26 @@
     self.inOutLabel.text = @"IN";
     self.roomNumberLabel.text = self.chooseRoomTextField.text;
     
-    /*****************************TTTTTTTTT****************************************/
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                    message:@"Set status as IN the room"
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-    [alert show];
-    /*****************************TTTTTTTTT****************************************/
-    
     // Post the data to Genie
-    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
-    /************************************************************************************************************************/
-//    [manager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":self.chooseRoomTextField.text} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-////        NSLog(@"JSON: %@", responseObject);
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-//                                                        message:@"Set status as IN the room"
-//                                                       delegate:nil
-//                                              cancelButtonTitle:@"OK"
-//                                              otherButtonTitles:nil];
-//        [alert show];
-//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-//        [self output:[NSString stringWithFormat:@"Error: %@", error]];
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-//                                                        message:@"Failed to set in/out status"
-//                                                       delegate:nil
-//                                              cancelButtonTitle:@"OK"
-//                                              otherButtonTitles:nil];
-//        [alert show];
-//    }];
-    /************************************************************************************************************************/
+
+    [AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":self.chooseRoomTextField.text} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+//        NSLog(@"JSON: %@", responseObject);
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                        message:@"Set status as IN the room"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        [self output:[NSString stringWithFormat:@"Error: %@", error]];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                        message:@"Failed to set in/out status"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    }];
+
     
     // Start the band's skin temperature detecting
     if (self.client && self.client.isDeviceConnected)
@@ -299,42 +278,28 @@
             // Create the Json Object for skin temperature
             NSString *tempString = [NSString stringWithFormat:@"%f", fTemp];
             
-            /*****************************TTTTTTTTT****************************************/
-            NSDate *date = [NSDate date];
-            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-            [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
-            NSString *string2 = [formatter stringFromDate:date];
-            
-            NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
-            [self output:outString];
-            /*****************************TTTTTTTTT****************************************/
-            
-            
             // Post the data to Genie
-            // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
-            /************************************************************************************************************************/
-//            [manager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-//                
-//                NSDate *date = [NSDate date];
-//                NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-//                [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
-//                NSString *string2 = [formatter stringFromDate:date];
-//                
-//                NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
-//                [self output:outString];
-//                
-//            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-//                [self output:[NSString stringWithFormat:@"Error: %@", error]];
-//            }];
-//            
-//            // Post data to Genie persistent skin temperature database, testing purpose only
-//            [manager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-//                NSLog(@"Success: %@",responseObject);
-//                
-//            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-//                NSLog(@"Posting to Testing database %@", error.description);
-//            }];
-            /************************************************************************************************************************/
+            [AFManager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                
+                NSDate *date = [NSDate date];
+                NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+                [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+                NSString *string2 = [formatter stringFromDate:date];
+                
+                NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
+                [self output:outString];
+                
+            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                [self output:[NSString stringWithFormat:@"Error: %@", error]];
+            }];
+            
+            // Post data to Genie persistent skin temperature database, testing purpose only
+            [AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                NSLog(@"Success: %@",responseObject);
+                
+            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                NSLog(@"Posting to Testing database %@", error.description);
+            }];
             
         }];
         
@@ -356,36 +321,23 @@
 
 - (IBAction)outButtonPressed:(UIButton *)sender {
     // Post the data to Genie
-    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
-    /************************************************************************************************************************/
-//    [manager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/out" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-//        NSLog(@"JSON: %@", responseObject);
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-//                                                        message:@"Set status as OUT of the room"
-//                                                       delegate:nil
-//                                              cancelButtonTitle:@"OK"
-//                                              otherButtonTitles:nil];
-//        [alert show];
-//    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-//        [self output:[NSString stringWithFormat:@"Error: %@", error]];
-//        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-//                                                        message:@"Failed to set in/out status"
-//                                                       delegate:nil
-//                                              cancelButtonTitle:@"OK"
-//                                              otherButtonTitles:nil];
-//        [alert show];
-//    }];
-    /************************************************************************************************************************/
-
-    
-    /*****************************TTTTTTTTT****************************************/
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                    message:@"Set status as OUT of the room"
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-    [alert show];
-    /*****************************TTTTTTTTT****************************************/
+    [AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/out" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSLog(@"JSON: %@", responseObject);
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
+                                                        message:@"Set status as OUT of the room"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        [self output:[NSString stringWithFormat:@"Error: %@", error]];
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                        message:@"Failed to set in/out status"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    }];
 
     
     [self output:@"Stop temperature detection"];
@@ -439,7 +391,7 @@
     [alert show];
 }
 
-#pragma mark - Client Manager Delegates
+#pragma mark - Microsoft Band Client Manager Delegates
 
 - (void)clientManager:(MSBClientManager *)clientManager clientDidConnect:(MSBClient *)client
 {
@@ -481,9 +433,6 @@
         self.roomNumberLabel.text = self.chooseRoomTextField.text;
     });
     
-    /*****************************TTTTTTTTT****************************************/
-    self.chooseRoomTextField.text = @"2236";
-    /*****************************TTTTTTTTT****************************************/
     
     if([self.chooseRoomTextField.text isEqualToString:@""])
     {
@@ -529,30 +478,27 @@
             
             
             // Post the data to Genie
-            // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
-            /************************************************************************************************************************/
-            //            [manager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-            //
-            //                NSDate *date = [NSDate date];
-            //                NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-            //                [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
-            //                NSString *string2 = [formatter stringFromDate:date];
-            //
-            //                NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
-            //                [self output:outString];
-            //
-            //            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-            //                [self output:[NSString stringWithFormat:@"Error: %@", error]];
-            //            }];
-            //
-            //            // Post data to Genie persistent skin temperature database, testing purpose only
-            //            [manager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-            //                NSLog(@"Success: %@",responseObject);
-            //
-            //            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-            //                NSLog(@"Posting to Testing database %@", error.description);
-            //            }];
-            /************************************************************************************************************************/
+            [AFManager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            
+                            NSDate *date = [NSDate date];
+                            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+                            [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+                            NSString *string2 = [formatter stringFromDate:date];
+            
+                            NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
+                            [self output:outString];
+            
+                        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                            [self output:[NSString stringWithFormat:@"Error: %@", error]];
+                        }];
+            
+            // Post data to Genie persistent skin temperature database, testing purpose only
+            [AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                            NSLog(@"Success: %@",responseObject);
+            
+                        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                            NSLog(@"Posting to Testing database %@", error.description);
+                        }];
             
         }];
         

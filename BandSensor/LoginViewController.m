@@ -43,16 +43,16 @@
         [alert show];
     }
 
-    // TEMPORARILY CANNOT WORK BECAUSE GENIE.UCSD.EDU IS BROKEN
-    // Cannot test this auto-login functionality because genie.ucsd.edu is down for now
     /************************************************************************/
-    KeychainItemWrapper* keychain = [[KeychainItemWrapper alloc] initWithIdentifier:@"Keychain" accessGroup:nil];
-    [keychain setObject:(__bridge id)(kSecAttrAccessibleWhenUnlocked) forKey:(__bridge id)(kSecAttrAccessible)];
-    [keychain setObject:self.usernameTextField.text forKey:(__bridge id)(kSecAttrAccount)];
-    [keychain setObject:self.passwordTextField.text forKey:(__bridge id)(kSecValueData)];
+//    KeychainItemWrapper* keychain = [[KeychainItemWrapper alloc] initWithIdentifier:@"Keychain" accessGroup:nil];
+//    [keychain setObject:(__bridge id)(kSecAttrAccessibleWhenUnlocked) forKey:(__bridge id)(kSecAttrAccessible)];
+//    [keychain setObject:self.usernameTextField.text forKey:(__bridge id)(kSecAttrAccount)];
+//    [keychain setObject:self.passwordTextField.text forKey:(__bridge id)(kSecValueData)];
     /************************************************************************/
     
-    [self performSegueWithIdentifier:@"loginSegue" sender:self];
+    [self performSegueWithIdentifier:@"loginToCollectData" sender:self];
+
+//    [self performSegueWithIdentifier:@"loginToHVACControl" sender:self];
 }
 
 -(void)dismissKeyboard {
@@ -61,12 +61,19 @@
 
 #pragma mark - Navigation
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
-    if([segue.identifier isEqualToString:@"loginSegue"])
-    {
-        SkinTemperatureViewController *controller = (SkinTemperatureViewController *)segue.destinationViewController;
+    if([segue.identifier isEqualToString:@"loginToCollectData"]){
+        UINavigationController *navigationController = (UINavigationController *)segue.destinationViewController;
+        CollectDataViewController *controller = [[navigationController viewControllers] lastObject];
         controller.username = self.usernameTextField.text;
         controller.password = self.passwordTextField.text;
     }
+    
+//    if([segue.identifier isEqualToString:@"loginToHVACControl"])
+//    {
+//        HVACControllViewController *controller = (HVACControllViewController *)segue.destinationViewController;
+//        controller.username = self.usernameTextField.text;
+//        controller.password = self.passwordTextField.text;
+//    }
     
 }
 
