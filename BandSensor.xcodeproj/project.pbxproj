@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4205EF4C1B00088100DB0D37 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4205EF4B1B00088100DB0D37 /* LoginViewController.m */; };
 		4205EF4F1B000AF200DB0D37 /* HVACControllViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4205EF4E1B000AF200DB0D37 /* HVACControllViewController.m */; };
+		422528851B573024000CDDB5 /* MicrosoftBandKit_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 422528841B573024000CDDB5 /* MicrosoftBandKit_iOS.framework */; };
 		4228AFFE1B4AD4A600376EF8 /* ProximityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228AFFD1B4AD4A600376EF8 /* ProximityKit.framework */; };
 		4228B0001B4AD4D000376EF8 /* ProximityKit.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4228AFFF1B4AD4D000376EF8 /* ProximityKit.plist */; };
 		4228B0021B4AD4F100376EF8 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228B0011B4AD4F100376EF8 /* libsqlite3.dylib */; };
@@ -37,6 +38,7 @@
 		4205EF4B1B00088100DB0D37 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		4205EF4D1B000AF200DB0D37 /* HVACControllViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HVACControllViewController.h; sourceTree = "<group>"; };
 		4205EF4E1B000AF200DB0D37 /* HVACControllViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HVACControllViewController.m; sourceTree = "<group>"; };
+		422528841B573024000CDDB5 /* MicrosoftBandKit_iOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MicrosoftBandKit_iOS.framework; sourceTree = "<group>"; };
 		4228AFFD1B4AD4A600376EF8 /* ProximityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ProximityKit.framework; sourceTree = "<group>"; };
 		4228AFFF1B4AD4D000376EF8 /* ProximityKit.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = ProximityKit.plist; sourceTree = "<group>"; };
 		4228B0011B4AD4F100376EF8 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
@@ -79,6 +81,7 @@
 				5F598E731AA636600071C70E /* CoreBluetooth.framework in Frameworks */,
 				C24870B29637BE86CE2CAD3A /* libPods.a in Frameworks */,
 				4228AFFE1B4AD4A600376EF8 /* ProximityKit.framework in Frameworks */,
+				422528851B573024000CDDB5 /* MicrosoftBandKit_iOS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +102,7 @@
 		514EDD8F30FEA367C69C17B1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				422528841B573024000CDDB5 /* MicrosoftBandKit_iOS.framework */,
 				4228B0091B4AD9F700376EF8 /* Security.framework */,
 				4228B0071B4AD50C00376EF8 /* Foundation.framework */,
 				4228B0051B4AD50400376EF8 /* UIKit.framework */,
