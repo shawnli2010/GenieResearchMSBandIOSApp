@@ -21,13 +21,13 @@
 		4231D3A01B4CB22B006CE54D /* CollectDataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4231D39F1B4CB22B006CE54D /* CollectDataViewController.m */; };
 		4231D3A31B4D9FBC006CE54D /* CollectDataSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4231D3A21B4D9FBC006CE54D /* CollectDataSettingViewController.m */; };
 		42BA43D21B093ECE00F13EF6 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 42BA43D11B093ECE00F13EF6 /* MBProgressHUD.m */; };
+		42FFA7311B59BA080095CED4 /* MicrosoftBandKit_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42FFA7301B59BA080095CED4 /* MicrosoftBandKit_iOS.framework */; };
 		5F598E4F1AA635E80071C70E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F598E4E1AA635E80071C70E /* main.m */; };
 		5F598E521AA635E80071C70E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F598E511AA635E80071C70E /* AppDelegate.m */; };
 		5F598E581AA635E80071C70E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5F598E561AA635E80071C70E /* Main.storyboard */; };
 		5F598E5A1AA635E80071C70E /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5F598E591AA635E80071C70E /* Images.xcassets */; };
 		5F598E5D1AA635E80071C70E /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5F598E5B1AA635E80071C70E /* LaunchScreen.xib */; };
 		5F598E731AA636600071C70E /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F598E721AA636600071C70E /* CoreBluetooth.framework */; };
-		5F598E751AA6366C0071C70E /* MicrosoftBandKit_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F598E741AA6366C0071C70E /* MicrosoftBandKit_iOS.framework */; };
 		C24870B29637BE86CE2CAD3A /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 2C3FAD8FED4B2B8AE53C4CC0 /* libPods.a */; };
 /* End PBXBuildFile section */
 
@@ -55,6 +55,7 @@
 		4231D3A21B4D9FBC006CE54D /* CollectDataSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectDataSettingViewController.m; sourceTree = "<group>"; };
 		42BA43D01B093ECE00F13EF6 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		42BA43D11B093ECE00F13EF6 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		42FFA7301B59BA080095CED4 /* MicrosoftBandKit_iOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MicrosoftBandKit_iOS.framework; sourceTree = "<group>"; };
 		5F598E491AA635E80071C70E /* BandSensor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BandSensor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F598E4D1AA635E80071C70E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5F598E4E1AA635E80071C70E /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -64,7 +65,6 @@
 		5F598E591AA635E80071C70E /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		5F598E5C1AA635E80071C70E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
 		5F598E721AA636600071C70E /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
-		5F598E741AA6366C0071C70E /* MicrosoftBandKit_iOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MicrosoftBandKit_iOS.framework; path = ../MicrosoftBandKit_iOS.framework; sourceTree = "<group>"; };
 		7AF866837476436FE83E0FDA /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -74,11 +74,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				4228B00A1B4AD9F700376EF8 /* Security.framework in Frameworks */,
+				42FFA7311B59BA080095CED4 /* MicrosoftBandKit_iOS.framework in Frameworks */,
 				4228B0081B4AD50C00376EF8 /* Foundation.framework in Frameworks */,
 				4228B0061B4AD50400376EF8 /* UIKit.framework in Frameworks */,
 				4228B0041B4AD4FC00376EF8 /* CoreGraphics.framework in Frameworks */,
 				4228B0021B4AD4F100376EF8 /* libsqlite3.dylib in Frameworks */,
-				5F598E751AA6366C0071C70E /* MicrosoftBandKit_iOS.framework in Frameworks */,
 				5F598E731AA636600071C70E /* CoreBluetooth.framework in Frameworks */,
 				C24870B29637BE86CE2CAD3A /* libPods.a in Frameworks */,
 				4228AFFE1B4AD4A600376EF8 /* ProximityKit.framework in Frameworks */,
@@ -169,7 +169,7 @@
 		5F598E761AA6368C0071C70E /* Framework */ = {
 			isa = PBXGroup;
 			children = (
-				5F598E741AA6366C0071C70E /* MicrosoftBandKit_iOS.framework */,
+				42FFA7301B59BA080095CED4 /* MicrosoftBandKit_iOS.framework */,
 				5F598E721AA636600071C70E /* CoreBluetooth.framework */,
 			);
 			name = Framework;
