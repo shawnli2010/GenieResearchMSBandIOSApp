@@ -10,13 +10,10 @@
 
 @interface CollectDataViewController ()
 {
-    NSMutableArray *roomArray;
-    
     NSMutableArray *feelArray;
     UIPickerView *feelPicker;
     int feelInt;
     
-    AFHTTPRequestOperationManager *AFManager;
 }
 @end
 
@@ -25,62 +22,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self.SKTTxtOutput setHidden:true];
+    [self.SKTTxtOutput setHidden:false];
     [self.currentSkinTempLabel setHidden:true];
     [self.dataRecordingTimeLabel setHidden:true];
-    
-    // Show the progress HUD when the app is trying to connect to the band
-    self.hud = [[MBProgressHUD alloc] init];
-    [self.view addSubview:self.hud];
-    self.hud.labelText = @"Connecting to the band...";
-    self.hud.yOffset = -100;
-    [self.hud show:YES];
-    
-    /****************** Microsoft Band Manager setup ***************************/
-    [MSBClientManager sharedManager].delegate = self;
-    NSArray	*clients = [[MSBClientManager sharedManager] attachedClients];
-    _client = [clients firstObject];
-    if ( _client == nil )
-    {
-        [self.hud hide:YES];
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Failed"
-                                                        message:@"No Bands Attached to the Phone"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    }
-    
-    [[MSBClientManager sharedManager] connectClient:_client];
-    
-    /*************************** AFNetWorking Manager setup ***************************/
-    AFManager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:[NSURL URLWithString:@"https://genie.ucsd.edu"]];
-    AFManager.requestSerializer = [AFJSONRequestSerializer serializer];
-    [AFManager.requestSerializer setAuthorizationHeaderFieldWithUsername:self.username password:self.password];
-
-
-    /*************************** Fetch the rooms for this user ***************************/
-    roomArray = [[NSMutableArray alloc] init];
-    [AFManager GET:@"https://genie.ucsd.edu/api/v1/users/" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        
-        int i = 0;
-        for(NSString *roomNumber in responseObject[@"rooms"])
-        {
-            [roomArray addObject:responseObject[@"rooms"][i][@"room"]];
-            i++;
-        }
-        
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"Error when fetch room: %@", error);
-//        [self output:[NSString stringWithFormat:@"Error: %@", error]];
-        [self.hud hide:YES];
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                        message:@"Your username or password is incorrect"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    }];
     
     //keyboard disappear when tapping outside of text field
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissKeyboard)];
@@ -97,8 +41,26 @@
     
     [self addFeelPicker];
     
-
-
+    // Automatically start skin temperature detecting
+    if (self.client && self.client.isDeviceConnected)
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Welcome!"
+                                                        message:@"Skin temperature detection will start shortly"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+        [self startDetectingSkinTemp];
+    }
+    else
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                        message:@"Band is not connected!Please press logout and re-login to reconnect the band"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
+    }
 }
 
 
@@ -148,7 +110,7 @@
         NSString *tempString = [NSString stringWithFormat:@"%.2f", fTemp];
         
         /*************************** Post the data to Genie ***************************/
-        [AFManager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString}
+        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString}
                 success:^(AFHTTPRequestOperation *operation, id responseObject)
          {
              NSDate *date = [NSDate date];
@@ -157,7 +119,7 @@
              NSString *timeString = [formatter stringFromDate:date];
              
              NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", timeString, tempString];
-
+             
              [self output:outString];
              NSLog(@"%@",outString);
              
@@ -174,11 +136,10 @@
          }];
         
         /*************************** Post data to Genie persistent skin temperature database, testing purpose only ***************************/
-        [AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":roomArray[0], @"feeling":[NSNumber numberWithInt:feelInt]}
+        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.roomArray[0], @"feeling":[NSNumber numberWithInt:feelInt]}
                 success:^(AFHTTPRequestOperation *operation, id responseObject)
          {
              NSLog(@"Success: %@",responseObject);
-             
          }
                 failure:^(AFHTTPRequestOperation *operation, NSError *error)
          {
@@ -192,89 +153,20 @@
 
 - (void)clientManager:(MSBClientManager *)clientManager clientDidConnect:(MSBClient *)client
 {
-    if([roomArray count] == 0)
-    {
-        [self.hud hide:YES];
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                        message:@"You have no room in Genie, please go to genie.ucsd.edu and add a room"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    }
-    else
-    {
-//        NSLog(@"%@",roomArray[0]);
-        [self.hud hide:YES];
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                        message:@"Band connected!"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    
-        if (self.client && self.client.isDeviceConnected)
-        {
-            [self startDetectingSkinTemp];
-        
-//  An event(wear to take off the band) has to happen in order for the following chunk of code to execute
-/************************************************************************************************************************************************/
-//        [self.client.sensorManager startBandContactUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorBandContactData *contactData, NSError *error) {
-//            // Check whether the user is wearing the band or not
-//            if(!contactData.wornState)
-//            {
-//                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Notice"
-//                                                                message:@"Band is NOT worn, skin temperature detection will stop!"
-//                                                               delegate:nil
-//                                                      cancelButtonTitle:@"OK"
-//                                                      otherButtonTitles:nil];
-//                [alert show];
-//                [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
-//            }
-//            else
-//            {
-//                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-//                                                                message:@"Band is worn, skin temperature detection will start!"
-//                                                               delegate:nil
-//                                                      cancelButtonTitle:@"OK"
-//                                                      otherButtonTitles:nil];
-//                [alert show];                
-//                [self output:@"Starting skin temperature updates..."];
-//                [self startDetectingSkinTemp];
-//            }
-//            
-//            /************************** Print Out For Debug **************************/
-//            NSString *myString = [NSString stringWithFormat:@"Wear State, %d", (int)(contactData.wornState)];
-//            NSDate *date = [NSDate date];
-//            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-//            [formatter setDateFormat:@"%hh:%mm:%ss"];
-//            NSString *timeString = [formatter stringFromDate:date];
-//            NSString* outString = [NSString stringWithFormat:@"%@, %@", myString, timeString];
-//            NSLog(@"%@",outString);
-//            /************************** Print Out For Debug **************************/
-//        }];
-/************************************************************************************************************************************************/
-    
-        }
-        else
-        {
-            [self output:@"Band is not connected. Please wait...."];
-        }
-    }
+    [self output:@"in CollectDataViewController clientDidConnect"];
+    NSLog(@"in CollectDataViewController clientDidConnect");
 }
 
 - (void)clientManager:(MSBClientManager *)clientManager clientDidDisconnect:(MSBClient *)client
 {
-    [self output:@"in ConnectedViewController disconnected"];
-//    [self output:@"Stop temperature detection"];
-//    [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
+    [self output:@"in CollectDataViewController clientDidDisconnect"];
+    NSLog(@"in CollectDataViewController clientDidDisconnect");
 }
 
 - (void)clientManager:(MSBClientManager *)clientManager client:(MSBClient *)client didFailToConnectWithError:(NSError *)error
 {
-    [self output:@"in ConnectedViewController failed to connect to band"];
-//    [self output:@"Stop temperature detection"];
-//    [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
+    [self output:@"in CollectDataViewController didFailToConnectWithError"];
+    NSLog(@"in CollectDataViewController didFailToConnectWithError");
 }
 
 # pragma mark - picker view helper method
@@ -310,7 +202,7 @@
     {
         feelInt = -1;
     }
-    else if([self.chooseFeelTextField.text isEqualToString:@"HOT"])
+    else if([self.chooseFeelTextField.text isEqualToString:@"GOOD"])
     {
         feelInt = 0;
     }
@@ -322,7 +214,7 @@
     {
         feelInt = 2;
     }
-    else if([self.chooseFeelTextField.text isEqualToString:@"GOOD"])
+    else if([self.chooseFeelTextField.text isEqualToString:@"HOT"])
     {
         feelInt = 3;
     }
@@ -387,6 +279,11 @@
 #pragma mark - button pressed method
 - (IBAction)settingButtonPressed:(UIBarButtonItem *)sender {
     [self performSegueWithIdentifier:@"CollectDataToSetting" sender:self];
+}
+
+- (IBAction)backButtonPressed:(UIBarButtonItem *)sender {
+    [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
+    [self.navigationController popViewControllerAnimated:TRUE];
 }
 
 @end

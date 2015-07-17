@@ -10,9 +10,17 @@
 #import "HVACControllViewController.h"
 #import "CollectDataViewController.h"
 #import "KeychainItemWrapper.h"
+#import "AFNetworking.h"
+#import "MBProgressHUD.h"
+
+
 
 @interface LoginViewController : UIViewController
+extern BOOL isFromLogout;
+
 @property (weak, nonatomic) IBOutlet UITextField *usernameTextField;
 @property (weak, nonatomic) IBOutlet UITextField *passwordTextField;
+@property (nonatomic, strong) MBProgressHUD *hud;
+
 
 @end

@@ -29,7 +29,7 @@
 #import "MBProgressHUD.h"
 
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate, MSBClientManagerDelegate,RPKManagerDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (nonatomic, weak) MSBClient *client;

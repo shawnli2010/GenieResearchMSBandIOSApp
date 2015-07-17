@@ -18,7 +18,6 @@
 
 
 // Skin temperature output
-@property (nonatomic, weak) MSBClient *client;
 @property (nonatomic, strong) MBProgressHUD *hud;
 @property (weak, nonatomic) IBOutlet UITextView *SKTTxtOutput;
 
@@ -33,10 +32,12 @@
 @property (weak, nonatomic) IBOutlet UILabel *inOutLabel;
 @property (weak, nonatomic) IBOutlet UILabel *roomNumberLabel;
 
-@property(nonatomic) NSString *username;
-@property(nonatomic) NSString *password;
-
 @property (strong, nonatomic) RPKManager *RPKmanager;
+
+/************* Properties got from the previous view controller ****************/
+@property (nonatomic, weak) MSBClient *client;
+@property (nonatomic, strong) AFHTTPRequestOperationManager *AFManager;
+@property (nonatomic, strong) NSMutableArray *roomArray;
 
 
 

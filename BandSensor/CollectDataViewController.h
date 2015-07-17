@@ -17,17 +17,18 @@
 extern BOOL pushNotificationIsOn;
 extern BOOL pushNotificationAlreadyOn;
 
-@property (nonatomic, weak) MSBClient *client;
 @property (nonatomic, strong) MBProgressHUD *hud;
 @property (weak, nonatomic) IBOutlet UITextView *SKTTxtOutput;
-
-@property(nonatomic) NSString *username;
-@property(nonatomic) NSString *password;
 
 @property (weak, nonatomic) IBOutlet UITextField *chooseFeelTextField;
 @property (weak, nonatomic) IBOutlet UIBarButtonItem *SettingButton;
 
 @property (weak, nonatomic) IBOutlet UILabel *currentSkinTempLabel;
 @property (weak, nonatomic) IBOutlet UILabel *dataRecordingTimeLabel;
+
+/************* Properties got from the previous view controller ****************/
+@property (nonatomic, weak) MSBClient *client;
+@property (nonatomic, strong) AFHTTPRequestOperationManager *AFManager;
+@property (nonatomic, strong) NSMutableArray *roomArray;
 
 @end

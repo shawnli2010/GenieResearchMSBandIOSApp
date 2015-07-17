@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4205EF4C1B00088100DB0D37 /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4205EF4B1B00088100DB0D37 /* LoginViewController.m */; };
 		4205EF4F1B000AF200DB0D37 /* HVACControllViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4205EF4E1B000AF200DB0D37 /* HVACControllViewController.m */; };
+		422528831B56F916000CDDB5 /* ChooseExperimentViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 422528821B56F916000CDDB5 /* ChooseExperimentViewController.m */; };
 		4228AFFE1B4AD4A600376EF8 /* ProximityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228AFFD1B4AD4A600376EF8 /* ProximityKit.framework */; };
 		4228B0001B4AD4D000376EF8 /* ProximityKit.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4228AFFF1B4AD4D000376EF8 /* ProximityKit.plist */; };
 		4228B0021B4AD4F100376EF8 /* libsqlite3.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4228B0011B4AD4F100376EF8 /* libsqlite3.dylib */; };
@@ -37,6 +38,8 @@
 		4205EF4B1B00088100DB0D37 /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		4205EF4D1B000AF200DB0D37 /* HVACControllViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HVACControllViewController.h; sourceTree = "<group>"; };
 		4205EF4E1B000AF200DB0D37 /* HVACControllViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HVACControllViewController.m; sourceTree = "<group>"; };
+		422528811B56F916000CDDB5 /* ChooseExperimentViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ChooseExperimentViewController.h; sourceTree = "<group>"; };
+		422528821B56F916000CDDB5 /* ChooseExperimentViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChooseExperimentViewController.m; sourceTree = "<group>"; };
 		4228AFFD1B4AD4A600376EF8 /* ProximityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ProximityKit.framework; sourceTree = "<group>"; };
 		4228AFFF1B4AD4D000376EF8 /* ProximityKit.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = ProximityKit.plist; sourceTree = "<group>"; };
 		4228B0011B4AD4F100376EF8 /* libsqlite3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.dylib; path = usr/lib/libsqlite3.dylib; sourceTree = SDKROOT; };
@@ -138,13 +141,15 @@
 				5F598E511AA635E80071C70E /* AppDelegate.m */,
 				4205EF4A1B00088100DB0D37 /* LoginViewController.h */,
 				4205EF4B1B00088100DB0D37 /* LoginViewController.m */,
+				422528811B56F916000CDDB5 /* ChooseExperimentViewController.h */,
+				422528821B56F916000CDDB5 /* ChooseExperimentViewController.m */,
 				4205EF4D1B000AF200DB0D37 /* HVACControllViewController.h */,
 				4205EF4E1B000AF200DB0D37 /* HVACControllViewController.m */,
 				4231D39E1B4CB22B006CE54D /* CollectDataViewController.h */,
 				4231D39F1B4CB22B006CE54D /* CollectDataViewController.m */,
-				5F598E561AA635E80071C70E /* Main.storyboard */,
 				4231D3A11B4D9FBC006CE54D /* CollectDataSettingViewController.h */,
 				4231D3A21B4D9FBC006CE54D /* CollectDataSettingViewController.m */,
+				5F598E561AA635E80071C70E /* Main.storyboard */,
 				5F598E591AA635E80071C70E /* Images.xcassets */,
 				5F598E5B1AA635E80071C70E /* LaunchScreen.xib */,
 				5F598E4C1AA635E80071C70E /* Supporting Files */,
@@ -298,6 +303,7 @@
 				42BA43D21B093ECE00F13EF6 /* MBProgressHUD.m in Sources */,
 				5F598E521AA635E80071C70E /* AppDelegate.m in Sources */,
 				5F598E4F1AA635E80071C70E /* main.m in Sources */,
+				422528831B56F916000CDDB5 /* ChooseExperimentViewController.m in Sources */,
 				4231D3A01B4CB22B006CE54D /* CollectDataViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -26,6 +26,7 @@
 // declare global variable for push notification recurrence minutes
 BOOL pushNotificationIsOn;
 BOOL pushNotificationAlreadyOn;
+BOOL isFromLogout;
 
 @interface AppDelegate ()
 
@@ -39,6 +40,7 @@ BOOL pushNotificationAlreadyOn;
     
     pushNotificationAlreadyOn = false;
     pushNotificationIsOn = false;
+    isFromLogout = false;
     
     if ([UIApplication instancesRespondToSelector:@selector(registerUserNotificationSettings:)])
     {
