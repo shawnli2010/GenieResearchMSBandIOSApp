@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>919D0621-237F-4CFC-801C-50A7DBBD256B</string>
+	<key>IDESourceControlProjectName</key>
+	<string>BandSensor</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>92D16FBBA46E375359A37B7BF62DB87DE806FDFB</key>
+		<string>https://github.com/shawnli2010/GenieResearchMSBandIOSApp.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>BandSensor.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>92D16FBBA46E375359A37B7BF62DB87DE806FDFB</key>
+		<string>..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/shawnli2010/GenieResearchMSBandIOSApp.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>92D16FBBA46E375359A37B7BF62DB87DE806FDFB</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>92D16FBBA46E375359A37B7BF62DB87DE806FDFB</string>
+			<key>IDESourceControlWCCName</key>
+			<string>BandSensor</string>
+		</dict>
+	</array>
+</dict>
+</plist>
