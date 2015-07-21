@@ -24,8 +24,6 @@
     // Do any additional setup after loading the view
     [self.SKTTxtOutput setHidden:true];
     
-    self.RPKmanager = [RPKManager managerWithDelegate:self];
-    
     NSString *startString = [NSString stringWithFormat:@"App Starts at %@", [self getCurrentTimeString]];
     [self output:startString];
     NSLog(@"%@",startString);
@@ -71,8 +69,6 @@
             [self.passwordTextField setText:@""];
         }
     }
-    
-    [self.RPKmanager start];
     NSLog(@"IN Login VIEWDIDAPPEAR!!!!");
 }
 
@@ -108,9 +104,7 @@
             // If the authentication is successful, then store the username and password into keychain for future auto login use
             [keychain setObject:self.usernameTextField.text forKey:(__bridge id)(kSecAttrAccount)];
             [keychain setObject:self.passwordTextField.text forKey:(__bridge id)(kSecValueData)];
-            
-            [self.RPKmanager stop];
-            
+                        
             [self performSegueWithIdentifier:@"loginToChoose" sender:self];
             
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
@@ -151,9 +145,7 @@
         
         controller.username = self.usernameTextField.text;
         controller.password = self.passwordTextField.text;
-        controller.AFManager = AFManager;
-        controller.RPKmanager = self.RPKmanager;
-        
+        controller.AFManager = AFManager;        
     }
 }
 
@@ -177,89 +169,6 @@
     currentTime = [currentTime dateByAddingTimeInterval:timeZoneSeconds];
     NSString *currentTimeString = [NSString stringWithFormat:@"%@",currentTime];
     return currentTimeString;
-}
-
-#pragma mark Proximity Kit Delegate Methods
-
-- (void)proximityKitDidSync:(RPKManager *)manager {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *message = [NSString stringWithFormat:@"LGVC: Did Sync AT TIME:%@", [self getCurrentTimeString]];
-        [self output:message];
-        NSLog(@"%@",message);
-    });
-}
-
-- (void)proximityKit:(RPKManager *)manager didEnter:(RPKBeacon*)region {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *message = [NSString stringWithFormat:@"LGVC: Entered Region %@ (%@)!!!!!!!!!! AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-        [self output:message];
-        NSLog(@"%@",message);
-        
-        // When enter an ibeacon region, try to perform auto login
-        if ([[keychain objectForKey:(__bridge id)kSecAttrAccount] length])
-        {
-            dispatch_async(dispatch_get_main_queue(), ^{
-                NSString *message = [NSString stringWithFormat:@"LGVC: AUTO LOGIN AT TIME: %@", [self getCurrentTimeString]];
-                [self output:message];
-            });
-        
-            [self performLogin];
-        }
-    });
-}
-
-- (void)proximityKit:(RPKManager *)manager didExit:(RPKBeacon *)region {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *message = [NSString stringWithFormat:@"LGVC: Exited Region %@ (%@)*********** AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-        [self output:message];
-        NSLog(@"%@", message);
-        
-        NSString *message2 = [NSString stringWithFormat:@"LGVC: major value = %@", region.major];
-        [self output:message2];
-    });
-}
-
-- (void)proximityKit:(RPKManager *)manager didRangeBeacons:(NSArray *)beacons inRegion:(RPKBeacon *)region
-{
-    for (RPKBeacon *beacon in beacons) {
-//        NSLog(@"LGVC: Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi);
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"LGVC: Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi];
-//            [self output:message];
-        });
-    }
-}
-
-- (void)proximityKit:(RPKManager *)manager didDetermineState:(RPKRegionState)state forRegion:(RPKRegion *)region
-{
-    if (state == RPKRegionStateInside) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"LGVC: State Changed: inside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-            [self output:message];
-            NSLog(@"%@",message);
-        });
-    } else if (state == RPKRegionStateOutside) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"LGVC: State Changed: outside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-            [self output:message];
-            NSLog(@"%@",message);
-        });
-    } else if (state == RPKRegionStateUnknown) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"LGVC: State Changed: unknown region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-            [self output:message];
-            NSLog(@"%@",message);
-        });
-    }
-}
-
-- (void)proximityKit:(RPKManager *)manager didFailWithError:(NSError *)error
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *message = [NSString stringWithFormat:@"LGVC: Error: %@ AT TIME:%@", error.description,[self getCurrentTimeString]];
-        [self output:message];
-        NSLog(@"%@", message);
-    });
 }
 
 @end

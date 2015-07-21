@@ -15,6 +15,9 @@
 #import "AFNetworking.h"
 
 @interface ChooseExperimentViewController : UIViewController <MSBClientManagerDelegate,RPKManagerDelegate>
+{
+    BOOL isInBeaconRange;
+}
 extern BOOL isFromLogout;
 extern BOOL inIbeaconRange;
 extern NSMutableArray *roomArray;
@@ -31,5 +34,8 @@ extern NSMutableArray *roomArray;
 @property (nonatomic, strong) AFHTTPRequestOperationManager *AFManager;
 @property (strong, nonatomic) RPKManager *RPKmanager;
 @property (weak, nonatomic) IBOutlet UITextView *SKTTxtOutput;
+
+@property (nonatomic) BOOL isInBeaconRange;
+
 
 @end

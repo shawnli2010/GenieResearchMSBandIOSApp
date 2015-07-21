@@ -16,6 +16,8 @@
  
     BOOL willSendFeeling;
     NSUserDefaults *userDefaults;
+    
+    NSString *tString;  // get a local var from a method
 }
 @end
 
@@ -117,6 +119,7 @@
         
         // Create the Json Object for skin temperature
         NSString *tempString = [NSString stringWithFormat:@"%.2f", fTemp];
+        tString = tempString;
         
         /*************************** Post the data to Genie ***************************/
         [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString}
@@ -145,7 +148,7 @@
          }];
         
         /*************************** Post data to Genie persistent skin temperature database, testing purpose only ***************************/
-        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":roomArray[0], @"feeling":[NSNumber numberWithInt:feelInt]}
+        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":roomArray[0], @"feeling":[NSNumber numberWithInt:99]}
                 success:^(AFHTTPRequestOperation *operation, id responseObject)
          {
              NSLog(@"Success: %@",responseObject);
@@ -242,6 +245,16 @@
     {
         feelInt = -3;
     }
+    
+    [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tString, @"room":[userDefaults objectForKey:@"current_room"], @"feeling":[NSNumber numberWithInt:feelInt]}
+                 success:^(AFHTTPRequestOperation *operation, id responseObject)
+     {
+         NSLog(@"Success: %@",responseObject);
+     }
+                 failure:^(AFHTTPRequestOperation *operation, NSError *error)
+     {
+         NSLog(@"Posting to Testing database %@", error.description);
+     }];
     
     [self.lastFeelingLabel setHidden:false];
     [self.lastFeelingLabel setText:self.chooseFeelTextField.text];

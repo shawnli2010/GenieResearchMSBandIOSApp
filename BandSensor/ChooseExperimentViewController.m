@@ -15,11 +15,20 @@
     NSUserDefaults *userDefaults;
     
     BOOL onThisVC;
+    
+    NSTimer *timerA;
+    NSTimer *timerB;
+    
+    NSInteger checkRangeCounter;
+    NSInteger checkRangeInt;
+    
 }
 
 @end
 
 @implementation ChooseExperimentViewController
+
+@synthesize isInBeaconRange;
 
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -39,9 +48,88 @@
 {
     [self.RPKmanager start];
     onThisVC = true;
+    
+    timerA = [NSTimer scheduledTimerWithTimeInterval:1
+                                              target:self
+                                            selector:@selector(timerACheck)
+                                            userInfo:nil
+                                             repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:timerA forMode:NSRunLoopCommonModes];
+    
+    checkRangeCounter = 2;
+    checkRangeInt = 0;
+    
     NSLog(@"IN ChooseExperiment VIEWDIDAPPEAR!!!!");
 }
 
+-(void)timerACheck
+{
+    [self output:@"I am OUT of region"];
+    if(checkRangeCounter != 2)
+    {
+        timerB = [NSTimer scheduledTimerWithTimeInterval:1
+                                                  target:self
+                                                selector:@selector(timerBCheck)
+                                                userInfo:nil
+                                                 repeats:YES];
+        [[NSRunLoop mainRunLoop] addTimer:timerB forMode:NSRunLoopCommonModes];
+        [self output:@"I just got INTO the region!!!!!!"];
+        
+        inIbeaconRange = TRUE;
+        // Set status as IN the room
+        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":[userDefaults objectForKey:@"current_room"]}
+                     success:^(AFHTTPRequestOperation *operation, id responseObject)
+         {
+             [self output:@"Set status as IN the room"];
+             NSLog(@"Set status as IN the room");
+         }
+                     failure:^(AFHTTPRequestOperation *operation, NSError *error)
+         {
+             NSLog(@"Faile to set room in/out status, error:%@", error.description);
+         }];
+        
+        [timerA invalidate];
+    }
+}
+
+-(void)timerBCheck
+{
+    if(checkRangeCounter > checkRangeInt)
+    {
+        [self output:@"I am INSIDE the region"];
+        checkRangeInt++;
+    }
+    else
+    {
+        checkRangeCounter = 2;
+        checkRangeInt = 0;
+        
+        timerA = [NSTimer scheduledTimerWithTimeInterval:1
+                                                  target:self
+                                                selector:@selector(timerACheck)
+                                                userInfo:nil
+                                                 repeats:YES];
+        [[NSRunLoop mainRunLoop] addTimer:timerA forMode:NSRunLoopCommonModes];
+        [self output:@"I just got OUT of the region*********"];
+
+        inIbeaconRange = FALSE;
+        // Set status as OUT the room
+        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/out" parameters:nil
+                     success:^(AFHTTPRequestOperation *operation, id responseObject)
+         {
+             [self output:@"Set status as OUT the room"];
+             NSLog(@"Set status as OUT the room");
+         }
+                     failure:^(AFHTTPRequestOperation *operation, NSError *error)
+         {
+             NSLog(@"Faile to set room in/out status, error:%@", error.description);
+         }];
+        
+        [timerB invalidate];
+    }
+}
+
+# pragma mark - Configure UI
 -(void)configureLayout
 {
     // Calculate the button width based on screen width
@@ -142,28 +230,12 @@
             
             if(inIbeaconRange && isHVAC)
             {
-                [self.RPKmanager stop];
-                onThisVC = false;
-                
-                // Set status as IN the room
-                [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":[userDefaults objectForKey:@"current_room"]}
-                             success:^(AFHTTPRequestOperation *operation, id responseObject)
-                 {
-                     [self output:@"Set status as IN the room"];
-                     NSLog(@"Set status as IN the room");
-                 }
-                             failure:^(AFHTTPRequestOperation *operation, NSError *error)
-                 {
-                     NSLog(@"Faile to set room in/out status, error:%@", error.description);
-                 }];
-                
                 UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Confirm"
                                                                 message:@"Are you wearing the band right now?"
                                                                delegate:self
                                                       cancelButtonTitle:@"NO"
                                                       otherButtonTitles:@"YES", nil];
                 [alert show];
-                NSLog(@"Auto NAVIGATE TO HVAC~~~~~~");
             }
         }
         else
@@ -206,7 +278,7 @@
         
         controller.AFManager = self.AFManager;
         controller.client = self.client;
-        controller.RPKmanager = self.RPKmanager;
+//        controller.RPKmanager = self.RPKmanager;
     }
     
 }
@@ -221,79 +293,69 @@
     });
 }
 
-- (void)proximityKit:(RPKManager *)manager didEnter:(RPKBeacon*)region {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *message = [NSString stringWithFormat:@"CEVC: Entered Region %@ (%@)!!!!!!!!!! AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-        [self output:message];
-        NSLog(@"%@",message);
-    });
-}
-
-- (void)proximityKit:(RPKManager *)manager didExit:(RPKBeacon *)region {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *message = [NSString stringWithFormat:@"CEVC: Exited Region %@ (%@)*********** AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-        [self output:message];
-        NSLog(@"%@", message);
-        
-        NSString *message2 = [NSString stringWithFormat:@"CEVC: major value = %@", region.major];
-        [self output:message2];
-    });
-}
-
 - (void)proximityKit:(RPKManager *)manager didRangeBeacons:(NSArray *)beacons inRegion:(RPKBeacon *)region
 {
     for (RPKBeacon *beacon in beacons) {
-//        NSLog(@"CEVC: Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi);
+        NSString *message = [NSString stringWithFormat:@"CEVC: Ranged identifier: %@ Major:%@ RSSI:%@",beacon.identifier,beacon.major,beacon.rssi];
+        NSLog(@"%@", message);
+        
+        for(NSString *room_number in roomArray)
+        {
+            if([room_number isEqualToString:[beacon.major stringValue]])
+            {
+                checkRangeCounter++;
+                if(onThisVC) [userDefaults setObject:room_number forKey:@"current_room"];
+            }
+        }
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"CEVC: Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi];
-            //            [self output:message];
-        });
+//            [self output:message];
+         });
     }
 }
 
 - (void)proximityKit:(RPKManager *)manager didDetermineState:(RPKRegionState)state forRegion:(RPKBeacon *)region
 {
-    if (state == RPKRegionStateInside) {
-        
-        // Check whether the beacon's room number belongs to this user or not
-        for(NSString *room_number in roomArray)
-        {
-            if([room_number isEqualToString:[region.major stringValue]])
-            {
-                inIbeaconRange = true;
-                if(onThisVC) [userDefaults setObject:room_number forKey:@"current_room"];
-            }
-        }
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"CEVC: State Changed: inside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-            [self output:message];
-            NSLog(@"%@",message);
-        });
-        
-    } else if (state == RPKRegionStateOutside) {
-        
-        // Check whether the user is getting out of the current room or not
-        NSString *current_room = [userDefaults objectForKey:@"current_room"];
-        if([current_room isEqualToString:[region.major stringValue]])
-        {
-            inIbeaconRange = false;
-            if(onThisVC) [userDefaults setObject:@"" forKey:@"current_room"];
-        }
-
-        
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"CEVC: State Changed: outside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-            [self output:message];
-            NSLog(@"%@",message);
-        });
-    } else if (state == RPKRegionStateUnknown) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"CEVC: State Changed: unknown region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
-            [self output:message];
-            NSLog(@"%@",message);
-        });
-    }
+//    if (state == RPKRegionStateInside) {
+//        
+//        // Check whether the beacon's room number belongs to this user or not
+//        for(NSString *room_number in roomArray)
+//        {
+//            if([room_number isEqualToString:[region.major stringValue]])
+//            {
+//                inIbeaconRange = true;
+//                if(onThisVC) [userDefaults setObject:room_number forKey:@"current_room"];
+//            }
+//        }
+//        
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            NSString *message = [NSString stringWithFormat:@"CEVC: State Changed: inside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+//            [self output:message];
+//            NSLog(@"%@",message);
+//        });
+//        
+//    } else if (state == RPKRegionStateOutside) {
+//        
+//        // Check whether the user is getting out of the current room or not
+//        NSString *current_room = [userDefaults objectForKey:@"current_room"];
+//        if([current_room isEqualToString:[region.major stringValue]])
+//        {
+//            inIbeaconRange = false;
+//            if(onThisVC) [userDefaults setObject:@"" forKey:@"current_room"];
+//        }
+//
+//        
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            NSString *message = [NSString stringWithFormat:@"CEVC: State Changed: outside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+//            [self output:message];
+//            NSLog(@"%@",message);
+//        });
+//    } else if (state == RPKRegionStateUnknown) {
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            NSString *message = [NSString stringWithFormat:@"CEVC: State Changed: unknown region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+//            [self output:message];
+//            NSLog(@"%@",message);
+//        });
+//    }
 }
 
 - (void)proximityKit:(RPKManager *)manager didFailWithError:(NSError *)error
@@ -309,6 +371,8 @@
 - (IBAction)jcdButtonPressed:(UIButton *)sender {
     [self.RPKmanager stop];
     onThisVC = false;
+    [timerA invalidate];
+    [timerB invalidate];
     [self performSegueWithIdentifier:@"ChooseToJustCollectData" sender:self];
 }
 
@@ -319,7 +383,18 @@
     {
         [self.RPKmanager stop];
         onThisVC = false;
+        [timerA invalidate];
+        [timerB invalidate];
         [self performSegueWithIdentifier:@"ChooseToHVACControl" sender:self];
+    }
+    else
+    {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
+                                                        message:@"You cannot start HVAC Control experiment because your are not in your room"
+                                                       delegate:nil
+                                              cancelButtonTitle:@"OK"
+                                              otherButtonTitles:nil];
+        [alert show];
     }
 }
 
@@ -333,6 +408,8 @@
     [[MSBClientManager sharedManager] cancelClientConnection:self.client];
     
     NSLog(@"roomArray: %@",roomArray);
+    [timerA invalidate];
+    [timerB invalidate];
 
     [self.navigationController dismissViewControllerAnimated:TRUE completion:nil];
 }
@@ -367,6 +444,12 @@
         if(buttonIndex == 1)
         {
             [self.RPKmanager stop];
+            onThisVC = false;
+            [timerA invalidate];
+            [timerB invalidate];
+            
+            NSLog(@"Auto NAVIGATE TO HVAC~~~~~~");
+            
             [self performSegueWithIdentifier:@"ChooseToHVACControl" sender:self];
         }
     }

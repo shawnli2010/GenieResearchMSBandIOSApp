@@ -15,6 +15,9 @@
 
 
 @interface HVACControllViewController : UIViewController <MSBClientManagerDelegate,UIPickerViewDataSource,UIPickerViewDelegate,RPKManagerDelegate>
+{
+    BOOL isInIBeaconRange;
+}
 extern BOOL inIbeaconRange;
 extern NSMutableArray *roomArray;
 
@@ -31,6 +34,9 @@ extern NSMutableArray *roomArray;
 @property (weak, nonatomic) IBOutlet UILabel *lastFeelingLabel;
 
 @property (strong, nonatomic) RPKManager *RPKmanager;
+
+@property (nonatomic) BOOL isInIBeaconRange;
+
 
 /************* Properties got from the previous view controller ****************/
 @property (nonatomic, weak) MSBClient *client;

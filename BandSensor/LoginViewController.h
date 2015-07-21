@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <ProximityKit/ProximityKit.h>
 
 #import "HVACControllViewController.h"
 #import "CollectDataViewController.h"
@@ -18,16 +17,13 @@
 
 
 
-@interface LoginViewController : UIViewController <RPKManagerDelegate>
+@interface LoginViewController : UIViewController
 extern BOOL isFromLogout;
 extern BOOL inIbeaconRange;
 
 @property (weak, nonatomic) IBOutlet UITextField *usernameTextField;
 @property (weak, nonatomic) IBOutlet UITextField *passwordTextField;
 @property (nonatomic, strong) MBProgressHUD *hud;
-
-@property (strong, nonatomic) RPKManager *RPKmanager;
-
 @property (weak, nonatomic) IBOutlet UITextView *SKTTxtOutput;
 
 
