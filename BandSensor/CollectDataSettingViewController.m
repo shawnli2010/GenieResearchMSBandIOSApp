@@ -36,7 +36,7 @@
     }
     else
     {
-        [userDefaults setBool:true forKey:@"pushNotificationIsOn"];
+        [userDefaults setBool:false forKey:@"pushNotificationIsOn"];
     }
 }
 

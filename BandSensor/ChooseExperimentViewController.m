@@ -33,7 +33,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
-//    [self.SKTTxtOutput setHidden:true];
+    [self.SKTTxtOutput setHidden:true];
     
     [self configureLayout];
     [self setUpMicrosoftBandManager];

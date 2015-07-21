@@ -24,6 +24,8 @@
     NSInteger checkRangeInt;
     
     NSString *tString;  // get a local var from a method
+    
+    BOOL haveStartedSkinTempDetectBefore;
 }
 @end
 
@@ -82,6 +84,7 @@
 
 //    [self startDetectingSkinTemp];
 //    [self performSelector:@selector(startDetectingSkinTemp) withObject:nil afterDelay:120];
+    haveStartedSkinTempDetectBefore = false;
     [self checkWornCondition];
 }
 
@@ -92,7 +95,16 @@
     {
         if(self.isInIBeaconRange)
         {
-            [self startDetectingSkinTemp];
+            if(haveStartedSkinTempDetectBefore)
+            {
+                [self startDetectingSkinTemp];
+            }
+            else
+            {
+                [self performSelector:@selector(startDetectingSkinTemp) withObject:nil afterDelay:120];
+                haveStartedSkinTempDetectBefore = true;
+                [self output:@"Delay start skin temp for 2 minutes"];
+            }
             self.inOutLabel.text = @"IN the room";
             self.roomNumberLabel.text = [userDefaults objectForKey:@"current_room"];
         }
@@ -134,7 +146,7 @@
          }];
         
         // Turn ON pushnotification
-        [userDefaults setBool:true forKey:@"pushNotificationIsOn"];
+//        [userDefaults setBool:true forKey:@"pushNotificationIsOn"];
         
         [timerA invalidate];
     }
@@ -175,8 +187,8 @@
          }];
         
         // Turn OFF the pushnotification
-        [userDefaults setBool:false forKey:@"pushNotificationIsOn"];
-        [userDefaults setBool:false forKey:@"pushNotificationAlreadyOn"];
+//        [userDefaults setBool:false forKey:@"pushNotificationIsOn"];
+//        [userDefaults setBool:false forKey:@"pushNotificationAlreadyOn"];
         
         [timerB invalidate];
     }
@@ -415,11 +427,13 @@
         // Check whether the user is wearing the band or not
         if(!contactData.wornState)
         {
+            [self output:@"Band is taken off, skin temp detecting will STOP"];
             [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
         }
         else
         {
-            [self performSelector:@selector(startDetectingSkinTemp) withObject:nil afterDelay:180];
+            [self output:@"Band is put on, skin temp detecting will START"];
+            [self performSelector:@selector(startDetectingSkinTemp) withObject:nil afterDelay:120];
         }
     }];
 }
