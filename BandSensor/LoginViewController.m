@@ -22,13 +22,21 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view
+    [self.SKTTxtOutput setHidden:true];
+    
+    self.RPKmanager = [RPKManager managerWithDelegate:self];
+    
+    NSString *startString = [NSString stringWithFormat:@"App Starts at %@", [self getCurrentTimeString]];
+    [self output:startString];
+    NSLog(@"%@",startString);
     
     /************************************************************************/
     keychain = [[KeychainItemWrapper alloc] initWithIdentifier:@"Credential" accessGroup:nil];
     [keychain setObject:@"MY_APP_CREDENTIALS" forKey:(__bridge id)kSecAttrService];
 
 
-    // Check whether there are existing keychain, if it exists, then auto login
+    // Check whether there are existing keychain, if it exists, then set the two textfields
+    // And in viewDidAppear the program will auto login
     if ([[keychain objectForKey:(__bridge id)kSecAttrAccount] length])
     {
         [self.usernameTextField  setText:[keychain objectForKey:(__bridge id)(kSecAttrAccount)]];
@@ -55,10 +63,7 @@
     {
         if(!isFromLogout)
         {
-            [self setupAFManager];
-            
-            [self performSegueWithIdentifier:@"loginToChoose" sender:self];
-            NSLog(@"in viewdidappear");
+            [self performLogin];
         }
         else
         {
@@ -66,6 +71,9 @@
             [self.passwordTextField setText:@""];
         }
     }
+    
+    [self.RPKmanager start];
+    NSLog(@"IN Login VIEWDIDAPPEAR!!!!");
 }
 
 - (void)didReceiveMemoryWarning {
@@ -73,7 +81,8 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (IBAction)loginButtonPressed:(UIButton *)sender {
+// Helper method to login the user
+-(void)performLogin {
     if([self.usernameTextField.text isEqualToString:@""] || [self.passwordTextField.text isEqualToString:@""] )
     {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
@@ -85,25 +94,28 @@
     }
     else
     {
-    
+        
         [self.hud show:YES];
-    
+        
+        // Associate username and pasword for this AFManager
         [self setupAFManager];
-    
+        
         /*************************** Use AFNetWorking Manager to authenticate username and password ***************************/
         // Send a useless request just for authentication
         [AFManager GET:@"https://genie.ucsd.edu/api/v1/users/" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
             [self.hud hide:YES];
-        
-            //    [keychain setObject:(__bridge id)(kSecAttrAccessibleWhenUnlocked) forKey:(__bridge id)(kSecAttrAccessible)];
+            
+            // If the authentication is successful, then store the username and password into keychain for future auto login use
             [keychain setObject:self.usernameTextField.text forKey:(__bridge id)(kSecAttrAccount)];
             [keychain setObject:self.passwordTextField.text forKey:(__bridge id)(kSecValueData)];
-        
+            
+            [self.RPKmanager stop];
+            
             [self performSegueWithIdentifier:@"loginToChoose" sender:self];
-        
+            
         } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
             [self.hud hide:YES];
-        
+            
             UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
                                                             message:@"Your username or password is incorrect"
                                                            delegate:nil
@@ -112,6 +124,10 @@
             [alert show];
         }];
     }
+}
+
+- (IBAction)loginButtonPressed:(UIButton *)sender {
+    [self performLogin];
 }
 
 -(void)dismissKeyboard {
@@ -136,10 +152,114 @@
         controller.username = self.usernameTextField.text;
         controller.password = self.passwordTextField.text;
         controller.AFManager = AFManager;
+        controller.RPKmanager = self.RPKmanager;
         
     }
 }
 
+#pragma mark - helper method, log information to the TextView console in the app
 
+- (void)output:(NSString *)message
+{
+    self.SKTTxtOutput.text = [NSString stringWithFormat:@"%@\n%@", self.SKTTxtOutput.text, message];
+    CGPoint p = [self.SKTTxtOutput contentOffset];
+    [self.SKTTxtOutput setContentOffset:p animated:NO];
+    [self.SKTTxtOutput scrollRangeToVisible:NSMakeRange([self.SKTTxtOutput.text length], 0)];
+}
+
+#pragma mark Helper method to get the current time string
+
+- (NSString *)getCurrentTimeString
+{
+    NSDate *currentTime = [NSDate date];
+    // Convert the time to local time zone
+    NSTimeInterval timeZoneSeconds = [[NSTimeZone localTimeZone] secondsFromGMT];
+    currentTime = [currentTime dateByAddingTimeInterval:timeZoneSeconds];
+    NSString *currentTimeString = [NSString stringWithFormat:@"%@",currentTime];
+    return currentTimeString;
+}
+
+#pragma mark Proximity Kit Delegate Methods
+
+- (void)proximityKitDidSync:(RPKManager *)manager {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"LGVC: Did Sync AT TIME:%@", [self getCurrentTimeString]];
+        [self output:message];
+        NSLog(@"%@",message);
+    });
+}
+
+- (void)proximityKit:(RPKManager *)manager didEnter:(RPKBeacon*)region {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"LGVC: Entered Region %@ (%@)!!!!!!!!!! AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+        [self output:message];
+        NSLog(@"%@",message);
+        
+        // When enter an ibeacon region, try to perform auto login
+        if ([[keychain objectForKey:(__bridge id)kSecAttrAccount] length])
+        {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSString *message = [NSString stringWithFormat:@"LGVC: AUTO LOGIN AT TIME: %@", [self getCurrentTimeString]];
+                [self output:message];
+            });
+        
+            [self performLogin];
+        }
+    });
+}
+
+- (void)proximityKit:(RPKManager *)manager didExit:(RPKBeacon *)region {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"LGVC: Exited Region %@ (%@)*********** AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+        [self output:message];
+        NSLog(@"%@", message);
+        
+        NSString *message2 = [NSString stringWithFormat:@"LGVC: major value = %@", region.major];
+        [self output:message2];
+    });
+}
+
+- (void)proximityKit:(RPKManager *)manager didRangeBeacons:(NSArray *)beacons inRegion:(RPKBeacon *)region
+{
+    for (RPKBeacon *beacon in beacons) {
+//        NSLog(@"LGVC: Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"LGVC: Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi];
+//            [self output:message];
+        });
+    }
+}
+
+- (void)proximityKit:(RPKManager *)manager didDetermineState:(RPKRegionState)state forRegion:(RPKRegion *)region
+{
+    if (state == RPKRegionStateInside) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"LGVC: State Changed: inside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+            [self output:message];
+            NSLog(@"%@",message);
+        });
+    } else if (state == RPKRegionStateOutside) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"LGVC: State Changed: outside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+            [self output:message];
+            NSLog(@"%@",message);
+        });
+    } else if (state == RPKRegionStateUnknown) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"LGVC: State Changed: unknown region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+            [self output:message];
+            NSLog(@"%@",message);
+        });
+    }
+}
+
+- (void)proximityKit:(RPKManager *)manager didFailWithError:(NSError *)error
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"LGVC: Error: %@ AT TIME:%@", error.description,[self getCurrentTimeString]];
+        [self output:message];
+        NSLog(@"%@", message);
+    });
+}
 
 @end

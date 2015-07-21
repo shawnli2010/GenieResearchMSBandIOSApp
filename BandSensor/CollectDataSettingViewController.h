@@ -10,9 +10,6 @@
 
 @interface CollectDataSettingViewController : UIViewController 
 
-extern BOOL pushNotificationIsOn;
-extern BOOL pushNotificationAlreadyOn;
-
 @property (weak, nonatomic) IBOutlet UISwitch *reminderSwitch;
 
 

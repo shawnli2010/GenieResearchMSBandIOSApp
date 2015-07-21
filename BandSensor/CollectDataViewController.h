@@ -14,8 +14,7 @@
 
 @interface CollectDataViewController : UIViewController <MSBClientManagerDelegate,UIPickerViewDataSource,UIPickerViewDelegate>
 
-extern BOOL pushNotificationIsOn;
-extern BOOL pushNotificationAlreadyOn;
+extern NSMutableArray *roomArray;
 
 @property (nonatomic, strong) MBProgressHUD *hud;
 @property (weak, nonatomic) IBOutlet UITextView *SKTTxtOutput;
@@ -25,10 +24,10 @@ extern BOOL pushNotificationAlreadyOn;
 
 @property (weak, nonatomic) IBOutlet UILabel *currentSkinTempLabel;
 @property (weak, nonatomic) IBOutlet UILabel *dataRecordingTimeLabel;
+@property (weak, nonatomic) IBOutlet UILabel *lastFeelingLabel;
 
 /************* Properties got from the previous view controller ****************/
 @property (nonatomic, weak) MSBClient *client;
 @property (nonatomic, strong) AFHTTPRequestOperationManager *AFManager;
-@property (nonatomic, strong) NSMutableArray *roomArray;
 
 @end

@@ -9,13 +9,15 @@
 #import "HVACControllViewController.h"
 #import "AppDelegate.h"
 
-@interface HVACControllViewController ()
+@interface HVACControllViewController () <UIAlertViewDelegate>
 {
-    UIPickerView *roomPicker;
-    
     NSMutableArray *feelArray;
     UIPickerView *feelPicker;
     int feelInt;
+    
+    NSUserDefaults *userDefaults;
+    
+    BOOL willSendFeeling;
 }
 @end
 
@@ -24,6 +26,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
+    willSendFeeling = false;
+    
     self.RPKmanager = [RPKManager managerWithDelegate:self];
     [self.RPKmanager start];
     
@@ -35,17 +39,10 @@
     
     NSString *startString = [NSString stringWithFormat:@"App Starts at %@", currentTime];
     [self output:startString];
-    /************************************************** Get the app start time *****************************************/    
+    /************************************************** Get the app start time *****************************************/
     
-    self.inOutLabel.text = @"OUT";
-    self.roomNumberLabel.text = @"";
-    [self.inOutLabel setTextAlignment:NSTextAlignmentCenter];
-    [self.roomNumberLabel setTextAlignment:NSTextAlignmentCenter];
-    
-    [self.chooseRoomTextField setBorderStyle:UITextBorderStyleLine];
     [self.chooseFeelTextField setBorderStyle:UITextBorderStyleLine];
     
-    [self addRoomPicker];
     [self addFeelPicker];
     
     //keyboard disappear when tapping outside of text field
@@ -53,13 +50,45 @@
     [self.view addGestureRecognizer:tap];
     
     feelArray = [[NSMutableArray alloc] init];
+    [feelArray addObject:@""];    
+    [feelArray addObject:@"GOOD"];
     [feelArray addObject:@"HOT"];
     [feelArray addObject:@"WARM"];
     [feelArray addObject:@"SLIGHTLY WARM"];
-    [feelArray addObject:@"GOOD"];
     [feelArray addObject:@"SLIGHTLY COOL"];
     [feelArray addObject:@"COOL"];
     [feelArray addObject:@"COLD"];
+    
+    userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    [self configureLayout];
+
+//    [self startDetectingSkinTemp];
+    [self performSelector:@selector(startDetectingSkinTemp) withObject:nil afterDelay:120];
+    [self checkWornCondition];
+}
+
+-(void)configureLayout
+{
+    [self.currentSkinTempLabel setHidden:true];
+    [self.dataRecordingTimeLabel setHidden:true];
+    [self.inOutLabel setHidden:true];
+    [self.roomNumberLabel setHidden:true];
+    [self.lastFeelingLabel setHidden:true];
+    
+//    [self.SKTTxtOutput setHidden:true];
+    
+    [self.roomNumberLabel setHidden:false];
+    [self.roomNumberLabel setText:[userDefaults objectForKey:@"current_room"]];
+    NSLog(@"check userDefaults: %@",[userDefaults objectForKey:@"current_room"]);
+    
+    [self.inOutLabel setHidden:false];
+    self.inOutLabel.text = @"IN the room";
+    
+    [self.inOutLabel setTextAlignment:NSTextAlignmentCenter];
+    [self.roomNumberLabel setTextAlignment:NSTextAlignmentCenter];
+    [self.currentSkinTempLabel setTextAlignment:NSTextAlignmentCenter];
+    [self.dataRecordingTimeLabel setTextAlignment:NSTextAlignmentCenter];
 }
 
 
@@ -75,10 +104,7 @@
 }
 
 - (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent: (NSInteger)component {
-    if(pickerView == roomPicker)
-        return self.roomArray.count;
-    else
-        return feelArray.count;
+    return feelArray.count;
 }
 
 #pragma mark- Picker View Delegate
@@ -86,51 +112,17 @@
             titleForRow:(NSInteger)row
            forComponent:(NSInteger)component
 {
-    if(pickerView == roomPicker)
-        return [self.roomArray objectAtIndex:row];
-    else
-        return [feelArray objectAtIndex:row];;
+    return [feelArray objectAtIndex:row];;
 }
 
 - (void)pickerView:(UIPickerView *)pickerView
       didSelectRow:(NSInteger)row
        inComponent:(NSInteger)component
 {
-    if(pickerView == roomPicker)
-        self.chooseRoomTextField.text = [NSString stringWithFormat:@"%@", [self.roomArray objectAtIndex:row]];
-    else
-        self.chooseFeelTextField.text = [NSString stringWithFormat:@"%@", [feelArray objectAtIndex:row]];
+    self.chooseFeelTextField.text = [NSString stringWithFormat:@"%@", [feelArray objectAtIndex:row]];
 }
 
 #pragma mark - add picker helper method
-// Helper method to add the picker
--(void)addRoomPicker
-{
-    roomPicker = [[UIPickerView alloc] initWithFrame:CGRectZero];
-    roomPicker.delegate = self;
-    roomPicker.dataSource = self;
-    [roomPicker setShowsSelectionIndicator:YES];
-    self.chooseRoomTextField.inputView = roomPicker;
-    
-    // Create done button in UIPickerView
-    UIToolbar*  mypickerToolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 320, 20)];
-    mypickerToolbar.barStyle = UIBarStyleBlackOpaque;
-    [mypickerToolbar sizeToFit];
-    NSMutableArray *barItems = [[NSMutableArray alloc] init];
-    UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:self action:nil];
-    [barItems addObject:flexSpace];
-    
-    UIBarButtonItem *doneBtn = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(pickerDoneClicked1)];
-    [barItems addObject:doneBtn];
-    
-    [mypickerToolbar setItems:barItems animated:YES];
-    self.chooseRoomTextField.inputAccessoryView = mypickerToolbar;
-}
-
--(void)pickerDoneClicked1
-{
-    [self.chooseRoomTextField resignFirstResponder];
-}
 
 -(void)addFeelPicker
 {
@@ -159,9 +151,11 @@
 {
     [self.chooseFeelTextField resignFirstResponder];
     
+    willSendFeeling = true;
+    
     if([self.chooseFeelTextField.text isEqualToString:@""])
     {
-        feelInt = -1;
+        feelInt = 100;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"GOOD"])
     {
@@ -169,11 +163,11 @@
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"WARM"])
     {
-        feelInt = 1;
+        feelInt = 2;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"SLIGHTLY WARM"])
     {
-        feelInt = 2;
+        feelInt = 1;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"HOT"])
     {
@@ -181,25 +175,21 @@
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"SLIGHTLY COOL"])
     {
-        feelInt = 4;
+        feelInt = -1;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"COOL"])
     {
-        feelInt = 5;
+        feelInt = -2;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"COLD"])
     {
-        feelInt = 6;
+        feelInt = -3;
     }
     
-    NSString *alertMessage = [@"You just set your feeling to " stringByAppendingString:self.chooseFeelTextField.text];
+    [self.lastFeelingLabel setHidden:false];
+    [self.lastFeelingLabel setText:self.chooseFeelTextField.text];
     
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                    message:alertMessage
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-    [alert show];
+    [self.chooseFeelTextField setText:@""];
 }
 
 #pragma mark - helper method, log information to the TextView console in the app
@@ -211,117 +201,132 @@
     [self.SKTTxtOutput setContentOffset:p animated:NO];
     [self.SKTTxtOutput scrollRangeToVisible:NSMakeRange([self.SKTTxtOutput.text length], 0)];
 }
+# pragma mark - helper method to wrap up the client delegate start detecting method
+-(void)startDetectingSkinTemp
+{
+    [self output:@"Start detecting skin temperature..."];
+    [self.client.sensorManager startSkinTempUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorSkinTempData *skinTemperatureData, NSError *error) {
+        
+        //Check whether the user have changed their settings of reminder notification
+        if( [userDefaults boolForKey:@"pushNotificationIsOn"] && ![userDefaults boolForKey:@"pushNotificationAlreadyOn"])
+        {
+            NSDate *currentTime = [NSDate date];;
+            UILocalNotification *localNotification = [[UILocalNotification alloc] init];
+            localNotification.fireDate = currentTime;
+            localNotification.alertBody = [NSString stringWithFormat:@"How are you feeling right now?"];
+            localNotification.soundName = UILocalNotificationDefaultSoundName;
+            localNotification.applicationIconBadgeNumber = 1;
+            localNotification.repeatInterval = NSCalendarUnitHour;
+            [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
+            
+            [userDefaults setBool:true forKey:@"pushNotificationAlreadyOn"];
+        }
+        else if(![userDefaults boolForKey:@"pushNotificationIsOn"])
+        {
+            // Delete all the previous notifications
+            UIApplication *app = [UIApplication sharedApplication];
+            NSArray *eventArray = [app scheduledLocalNotifications];
+            for (int i=0; i<[eventArray count]; i++)
+            {
+                //Cancelling local notification
+                [app cancelLocalNotification:eventArray[i]];
+            }
+            
+            [userDefaults setBool:false forKey:@"pushNotificationAlreadyOn"];
+        }
+        
+        
+        // Convert c to f
+        double fTemp = skinTemperatureData.temperature * (9.0/5.0) + 32;
+        
+        // Create the Json Object for skin temperature
+        NSString *tempString = [NSString stringWithFormat:@"%.2f", fTemp];
+        
+        /*************************** Post the data to Genie ***************************/
+        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString}
+                     success:^(AFHTTPRequestOperation *operation, id responseObject)
+         {
+             NSDate *date = [NSDate date];
+             NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+             [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
+             NSString *timeString = [formatter stringFromDate:date];
+             
+             NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", timeString, tempString];
+             
+             [self output:outString];
+             NSLog(@"%@",outString);
+             
+             [self.dataRecordingTimeLabel setText:timeString];
+             [self.currentSkinTempLabel setText:tempString];
+             [self.currentSkinTempLabel setHidden:false];
+             [self.dataRecordingTimeLabel setHidden:false];
+             
+         }
+                     failure:^(AFHTTPRequestOperation *operation, NSError *error)
+         {
+             [self output:[NSString stringWithFormat:@"Error: %@", error]];
+             NSLog(@"%@",[NSString stringWithFormat:@"Error: %@", error]);
+         }];
+        
+        if(!willSendFeeling)
+        {
+            feelInt = 99;
+            NSLog(@"willSendFeeling == false");
+        }
+        else
+        {
+            NSLog(@"willSendFeeling == true");
+        }
+        
+        /*************************** Post data to Genie persistent skin temperature database, testing purpose only ***************************/
+        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":[userDefaults objectForKey:@"current_room"], @"feeling":[NSNumber numberWithInt:feelInt]}
+                     success:^(AFHTTPRequestOperation *operation, id responseObject)
+         {
+             NSLog(@"Success: %@",responseObject);
+             willSendFeeling = false;
+         }
+                     failure:^(AFHTTPRequestOperation *operation, NSError *error)
+         {
+             NSLog(@"Posting to Testing database %@", error.description);
+         }];
+        
+    }];
+}
+
+#pragma mark - Helper method to check whether the user is wearing the band or not
+-(void)checkWornCondition
+{
+    //  An event(wear to take off the band) has to happen in order for the following chunk of code to execute
+    [self.client.sensorManager startBandContactUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorBandContactData *contactData, NSError *error) {
+        // Check whether the user is wearing the band or not
+        if(!contactData.wornState)
+        {
+            [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
+        }
+        else
+        {
+            [self performSelector:@selector(startDetectingSkinTemp) withObject:nil afterDelay:180];
+        }
+    }];
+}
+
 
 /*************************************************************************************/
 #pragma mark - Button Pressed methods
-- (IBAction)inButtonPressed:(UIButton *)sender {
-    if([self.chooseRoomTextField.text isEqualToString:@""])
-    {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                        message:@"Please choose your room number"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-        return;
-    }
-    
-    // Post the data to Genie
-
-    [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":self.chooseRoomTextField.text} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        
-        self.inOutLabel.text = @"IN";
-        self.roomNumberLabel.text = self.chooseRoomTextField.text;
-        
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        [self output:[NSString stringWithFormat:@"Error: %@", error]];
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                        message:@"Failed to set in/out status"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    }];
-
-    
-    // Start the band's skin temperature detecting
-    if (self.client && self.client.isDeviceConnected)
-    {
-        [self output:@"Starting skin temperature updates..."];
-        [self.client.sensorManager startSkinTempUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorSkinTempData *skinTemperatureData, NSError *error) {
-            
-            // Convert c to f
-            double fTemp = skinTemperatureData.temperature * (9.0/5.0) + 32;
-            
-            // Create the Json Object for skin temperature
-            NSString *tempString = [NSString stringWithFormat:@"%f", fTemp];
-            
-            // Post the data to Genie
-            [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                
-                NSDate *date = [NSDate date];
-                NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-                [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
-                NSString *string2 = [formatter stringFromDate:date];
-                
-                NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
-                [self output:outString];
-                
-            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                [self output:[NSString stringWithFormat:@"Error: %@", error]];
-            }];
-            
-            // Post data to Genie persistent skin temperature database, testing purpose only
-            [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                NSLog(@"Success: %@",responseObject);
-                
-            } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                NSLog(@"Posting to Testing database %@", error.description);
-            }];
-            
-        }];
-        
-        [self.client.sensorManager startBandContactUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorBandContactData *contactData, NSError *error) {
-            NSString *myString = [NSString stringWithFormat:@"Wear State, %d", (int)(contactData.wornState)];
-            NSDate *date = [NSDate date];
-            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-            [formatter setDateFormat:@"%hh:%mm:%ss"];
-            NSString *timeString = [formatter stringFromDate:date];
-            NSString* outString = [NSString stringWithFormat:@"%@, %@", myString, timeString];
-            NSLog(@"%@",outString);
-        }];
-    }
-    else
-    {
-        [self output:@"Band is not connected. Please wait...."];
-    }
-}
-
-- (IBAction)outButtonPressed:(UIButton *)sender {
-    // Post the data to Genie
-    [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/out" parameters:nil success:^(AFHTTPRequestOperation *operation, id responseObject) {
-        self.inOutLabel.text = @"OUT";
-        self.roomNumberLabel.text = @"";
-    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        [self output:[NSString stringWithFormat:@"Error: %@", error]];
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                        message:@"Failed to set in/out status"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-    }];
-
-    
-    [self output:@"Stop temperature detection"];
-    [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
-
-}
 
 - (IBAction)backButtonPressed:(UIBarButtonItem *)sender {
-    [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
-    [self.navigationController popViewControllerAnimated:TRUE];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Confirm"
+                                                    message:@"Go back to experiments choosing page will stop skin temperature detecting, are your sure you want to go back?"
+                                                   delegate:self
+                                          cancelButtonTitle:@"Cancel"
+                                          otherButtonTitles:@"Yes", nil];
+    [alert show];
 }
+
+- (IBAction)settingButtonPressed:(UIBarButtonItem *)sender {
+    [self performSegueWithIdentifier:@"HVACToSetting" sender:self];
+}
+
 
 #pragma mark - Microsoft Band Client Manager Delegates
 
@@ -347,158 +352,106 @@
 
 - (void)proximityKitDidSync:(RPKManager *)manager {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self output:@"Did Sync"];
+        [self output:@"HVACVC: Did Sync"];
     });
-    NSLog(@"Did Sync");
+    NSLog(@"HVACVC: Did Sync");
     
 }
-- (void)proximityKit:(RPKManager *)manager didEnter:(RPKRegion*)region {
-    NSLog(@"Entered Region %@ (%@)", region.name, region.identifier);
+- (void)proximityKit:(RPKManager *)manager didEnter:(RPKBeacon*)region {
+    NSLog(@"HVACVC: Entered Region %@ (%@)", region.name, region.identifier);
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *message = [NSString stringWithFormat:@"Entered Region %@ (%@)!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", region.name, region.identifier];
+        NSString *message = [NSString stringWithFormat:@"HVACVC: Entered Region %@ (%@)!!!!!!!", region.name, region.identifier];
         [self output:message];
         
-        self.inOutLabel.text = @"IN";
-        self.roomNumberLabel.text = self.chooseRoomTextField.text;
+        // Check whether the beacon's room number belongs to this user or not
+        for(NSString *room_number in roomArray)
+        {
+            if([room_number isEqualToString:[region.major stringValue]])
+            {
+                inIbeaconRange = true;
+                [userDefaults setObject:room_number forKey:@"current_room"];
+            
+                self.inOutLabel.text = @"IN the room";
+                self.roomNumberLabel.text = [userDefaults objectForKey:@"current_room"];
+                
+                
+                [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":[userDefaults objectForKey:@"current_room"]}
+                             success:^(AFHTTPRequestOperation *operation, id responseObject)
+                 {
+                     [self output:@"Set status as IN the room"];
+                     NSLog(@"Set status as IN the room");
+                 }
+                             failure:^(AFHTTPRequestOperation *operation, NSError *error)
+                 {
+                     NSLog(@"Faile to set room in/out status, error:%@", error.description);
+                 }];
+                
+                [self startDetectingSkinTemp];
+            }
+        }
     });
-    
-    
-    if([self.chooseRoomTextField.text isEqualToString:@""])
-    {
-        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error"
-                                                        message:@"Please choose your room number"
-                                                       delegate:nil
-                                              cancelButtonTitle:@"OK"
-                                              otherButtonTitles:nil];
-        [alert show];
-        return;
-    }
-    
-    /*****************************TTTTTTTTT****************************************/
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                    message:@"Set status as IN the room"
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-    [alert show];
-    /*****************************TTTTTTTTT****************************************/
-    
-    // Start the band's skin temperature detecting
-    if (self.client && self.client.isDeviceConnected)
-    {
-        [self output:@"Starting skin temperature updates..."];
-        [self.client.sensorManager startSkinTempUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorSkinTempData *skinTemperatureData, NSError *error) {
-            
-            // Convert c to f
-            double fTemp = skinTemperatureData.temperature * (9.0/5.0) + 32;
-            
-            // Create the Json Object for skin temperature
-            NSString *tempString = [NSString stringWithFormat:@"%f", fTemp];
-            
-            /*****************************TTTTTTTTT****************************************/
-            NSDate *date = [NSDate date];
-            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-            [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
-            NSString *string2 = [formatter stringFromDate:date];
-            
-            NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
-            [self output:outString];
-            /*****************************TTTTTTTTT****************************************/
-            
-            
-            // Post the data to Genie
-            [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/skintemperature" parameters:@{@"skin_temperature": tempString} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-            
-                            NSDate *date = [NSDate date];
-                            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-                            [formatter setDateFormat:@"YYYY-MM-dd HH:mm:ss"];
-                            NSString *string2 = [formatter stringFromDate:date];
-            
-                            NSString* outString = [NSString stringWithFormat:@"%@:   %@ f", string2, tempString];
-                            [self output:outString];
-            
-                        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                            [self output:[NSString stringWithFormat:@"Error: %@", error]];
-                        }];
-            
-            // Post data to Genie persistent skin temperature database, testing purpose only
-            [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.chooseRoomTextField.text, @"feeling":[NSNumber numberWithInt:feelInt]} success:^(AFHTTPRequestOperation *operation, id responseObject) {
-                            NSLog(@"Success: %@",responseObject);
-            
-                        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                            NSLog(@"Posting to Testing database %@", error.description);
-                        }];
-            
-        }];
-        
-        [self.client.sensorManager startBandContactUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorBandContactData *contactData, NSError *error) {
-            NSString *myString = [NSString stringWithFormat:@"Wear State, %d", (int)(contactData.wornState)];
-            NSDate *date = [NSDate date];
-            NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-            [formatter setDateFormat:@"%hh:%mm:%ss"];
-            NSString *timeString = [formatter stringFromDate:date];
-            NSString* outString = [NSString stringWithFormat:@"%@, %@", myString, timeString];
-            NSLog(@"%@",outString);
-        }];
-    }
-    else
-    {
-        [self output:@"Band is not connected. Please wait...."];
-    }
 }
 
-- (void)proximityKit:(RPKManager *)manager didExit:(RPKRegion *)region {
-    NSLog(@"Exited Region %@ (%@)", region.name, region.identifier);
+- (void)proximityKit:(RPKManager *)manager didExit:(RPKBeacon *)region {
+    NSLog(@"HVACVC: Exited Region %@ (%@)", region.name, region.identifier);
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *message = [NSString stringWithFormat:@"Exited Region %@ (%@)*****************************************************************", region.name, region.identifier];
+        NSString *message = [NSString stringWithFormat:@"HVACVC: Exited Region %@ (%@)******************", region.name, region.identifier];
         [self output:message];
         
-        self.inOutLabel.text = @"OUT";
-        self.roomNumberLabel.text = @"";
+        // Check whether the user is getting out of the current room or not
+        NSString *current_room = [userDefaults objectForKey:@"current_room"];
+        [self output:current_room];
+        [self output:@"*****************~~~~~~~~~~~~~~~~~~~~~~~~~"];
+        [self output:[region.major stringValue]];
+        if([current_room isEqualToString:[region.major stringValue]])
+        {
+            inIbeaconRange = false;
+            [userDefaults setObject:@"" forKey:@"current_room"];
+            
+            self.inOutLabel.text = @"OUT of room";
+            self.roomNumberLabel.text = @"";
+            
+            [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/out" parameters:nil
+                         success:^(AFHTTPRequestOperation *operation, id responseObject)
+             {
+                 [self output:@"Set status as OUT the room"];
+                 NSLog(@"Set status as OUT the room");
+             }
+                         failure:^(AFHTTPRequestOperation *operation, NSError *error)
+             {
+                 NSLog(@"Faile to set room in/out status, error:%@", error.description);
+             }];
+       
+            [self output:@"Stop temperature detection"];
+            [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
+        }
+        
     });
-    
-    /*****************************TTTTTTTTT****************************************/
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                    message:@"Set status as OUT the room"
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-    [alert show];
-    /*****************************TTTTTTTTT****************************************/
-    
-    [self output:@"Stop temperature detection"];
-    [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
 }
 
-//- (void)proximityKit:(RPKManager *)manager didRangeBeacons:(NSArray *)beacons inRegion:(RPKBeacon *)region
-//{
-//    for (RPKBeacon *beacon in beacons) {
-//        NSLog(@"Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi);
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            NSString *message = [NSString stringWithFormat:@"Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi];
-//            [self output:message];
-//        });
-//    }
-//}
+- (void)proximityKit:(RPKManager *)manager didRangeBeacons:(NSArray *)beacons inRegion:(RPKBeacon *)region
+{
+
+}
 
 - (void)proximityKit:(RPKManager *)manager didDetermineState:(RPKRegionState)state forRegion:(RPKRegion *)region
 {
     if (state == RPKRegionStateInside) {
-        NSLog(@"State Changed: inside region %@ (%@)", region.name, region.identifier);
+        NSLog(@"HVACVC: State Changed: inside region %@ (%@)", region.name, region.identifier);
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"State Changed: inside region %@ (%@)", region.name, region.identifier];
+            NSString *message = [NSString stringWithFormat:@"HVACVC: State Changed: inside region %@ (%@)", region.name, region.identifier];
             [self output:message];
         });
     } else if (state == RPKRegionStateOutside) {
-        NSLog(@"State Changed: outside region %@ (%@)", region.name, region.identifier);
+        NSLog(@"HVACVC: State Changed: outside region %@ (%@)", region.name, region.identifier);
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"State Changed: outside region %@ (%@)", region.name, region.identifier];
+            NSString *message = [NSString stringWithFormat:@"HVACVC: State Changed: outside region %@ (%@)", region.name, region.identifier];
             [self output:message];
         });
     } else if (state == RPKRegionStateUnknown) {
-        NSLog(@"State Changed: unknown region %@ (%@)", region.name, region.identifier);
+        NSLog(@"HVACVC: State Changed: unknown region %@ (%@)", region.name, region.identifier);
         dispatch_async(dispatch_get_main_queue(), ^{
-            NSString *message = [NSString stringWithFormat:@"State Changed: unknown region %@ (%@)", region.name, region.identifier];
+            NSString *message = [NSString stringWithFormat:@"HVACVC: State Changed: unknown region %@ (%@)", region.name, region.identifier];
             [self output:message];
         });
     }
@@ -506,11 +459,25 @@
 
 - (void)proximityKit:(RPKManager *)manager didFailWithError:(NSError *)error
 {
-    NSLog(@"Error: %@", error.description);
+    NSLog(@"HVACVC: Error: %@", error.description);
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSString *message = [NSString stringWithFormat:@"Error: %@", error.description];
+        NSString *message = [NSString stringWithFormat:@"HVACVC: Error: %@", error.description];
         [self output:message];
     });
+}
+
+# pragma mark - Alert view delegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if([alertView.title isEqualToString:@"Confirm"])
+    {
+        if(buttonIndex == 1)
+        {
+            [self.RPKmanager stop];
+            [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
+            [self.navigationController popViewControllerAnimated:TRUE];
+        }
+    }
 }
 
 

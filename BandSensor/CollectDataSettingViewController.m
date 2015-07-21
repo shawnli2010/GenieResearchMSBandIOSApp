@@ -9,7 +9,9 @@
 #import "CollectDataSettingViewController.h"
 
 @interface CollectDataSettingViewController ()
-
+{
+    NSUserDefaults *userDefaults;
+}
 @end
 
 @implementation CollectDataSettingViewController
@@ -20,18 +22,21 @@
 
     [self.reminderSwitch addTarget:self action:@selector(stateChanged:) forControlEvents:UIControlEventValueChanged];
     
-    if(pushNotificationIsOn) [self.reminderSwitch setOn:YES];
+    userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    if([userDefaults boolForKey:@"pushNotificationIsOn"]) [self.reminderSwitch setOn:YES];
+    else    [self.reminderSwitch setOn:NO];
 }
 
 - (void)stateChanged:(UISwitch *)switchState
 {
     if ([switchState isOn])
     {
-        pushNotificationIsOn = true;
+        [userDefaults setBool:true forKey:@"pushNotificationIsOn"];
     }
     else
     {
-        pushNotificationIsOn = false;
+        [userDefaults setBool:true forKey:@"pushNotificationIsOn"];
     }
 }
 

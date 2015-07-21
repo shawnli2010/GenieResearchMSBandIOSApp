@@ -10,9 +10,11 @@
 #import "CollectDataViewController.h"
 #import "HVACControllViewController.h"
 
-@interface ChooseExperimentViewController ()
+@interface ChooseExperimentViewController () <UIAlertViewDelegate>
 {
-    NSMutableArray *roomArray;
+    NSUserDefaults *userDefaults;
+    
+    BOOL onThisVC;
 }
 
 @end
@@ -22,10 +24,22 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view.
+//    [self.SKTTxtOutput setHidden:true];
     
     [self configureLayout];
     [self setUpMicrosoftBandManager];
     [self fetchRooms];
+
+    userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    self.RPKmanager = [RPKManager managerWithDelegate:self];
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+    [self.RPKmanager start];
+    onThisVC = true;
+    NSLog(@"IN ChooseExperiment VIEWDIDAPPEAR!!!!");
 }
 
 -(void)configureLayout
@@ -47,6 +61,7 @@
     self.hud.labelText = @"Connecting to the band...";
     self.hud.yOffset = -10;
     [self.hud show:YES];
+
 }
 
 -(void)setUpMicrosoftBandManager{
@@ -116,12 +131,40 @@
         if (self.client && self.client.isDeviceConnected)
         {
             [self.hud hide:YES];
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                            message:@"Band connected!"
-                                                           delegate:nil
-                                                  cancelButtonTitle:@"OK"
-                                                  otherButtonTitles:nil];
-            [alert show];
+            
+            // If the user has chosen HVAC experiment before
+            // AND the user is in ibeacon range right now
+            // then auto navigate user to HVAC control
+            BOOL isHVAC = [userDefaults boolForKey:@"isHVAC"];
+            
+            if(isHVAC) NSLog(@"isHVAC == TRUE !!!~~~!!!~~~");
+            if(inIbeaconRange) NSLog(@"inIbeaconRange == TRUE !!!~~~!!!~~~");
+            
+            if(inIbeaconRange && isHVAC)
+            {
+                [self.RPKmanager stop];
+                onThisVC = false;
+                
+                // Set status as IN the room
+                [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/changeroom/in" parameters:@{@"room_name":[userDefaults objectForKey:@"current_room"]}
+                             success:^(AFHTTPRequestOperation *operation, id responseObject)
+                 {
+                     [self output:@"Set status as IN the room"];
+                     NSLog(@"Set status as IN the room");
+                 }
+                             failure:^(AFHTTPRequestOperation *operation, NSError *error)
+                 {
+                     NSLog(@"Faile to set room in/out status, error:%@", error.description);
+                 }];
+                
+                UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Confirm"
+                                                                message:@"Are you wearing the band right now?"
+                                                               delegate:self
+                                                      cancelButtonTitle:@"NO"
+                                                      otherButtonTitles:@"YES", nil];
+                [alert show];
+                NSLog(@"Auto NAVIGATE TO HVAC~~~~~~");
+            }
         }
         else
         {
@@ -155,7 +198,6 @@
         CollectDataViewController *controller = (CollectDataViewController *)segue.destinationViewController;
         
         controller.AFManager = self.AFManager;
-        controller.roomArray = roomArray;
         controller.client = self.client;
     }
     
@@ -163,20 +205,122 @@
         HVACControllViewController *controller = (HVACControllViewController *)segue.destinationViewController;
         
         controller.AFManager = self.AFManager;
-        controller.roomArray = roomArray;
         controller.client = self.client;
+        controller.RPKmanager = self.RPKmanager;
     }
     
 }
 
+#pragma mark Proximity Kit Delegate Methods
+
+- (void)proximityKitDidSync:(RPKManager *)manager {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"CEVC: Did Sync AT TIME:%@", [self getCurrentTimeString]];
+        [self output:message];
+        NSLog(@"%@",message);
+    });
+}
+
+- (void)proximityKit:(RPKManager *)manager didEnter:(RPKBeacon*)region {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"CEVC: Entered Region %@ (%@)!!!!!!!!!! AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+        [self output:message];
+        NSLog(@"%@",message);
+    });
+}
+
+- (void)proximityKit:(RPKManager *)manager didExit:(RPKBeacon *)region {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"CEVC: Exited Region %@ (%@)*********** AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+        [self output:message];
+        NSLog(@"%@", message);
+        
+        NSString *message2 = [NSString stringWithFormat:@"CEVC: major value = %@", region.major];
+        [self output:message2];
+    });
+}
+
+- (void)proximityKit:(RPKManager *)manager didRangeBeacons:(NSArray *)beacons inRegion:(RPKBeacon *)region
+{
+    for (RPKBeacon *beacon in beacons) {
+//        NSLog(@"CEVC: Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"CEVC: Ranged UUID: %@ Major:%@ Minor:%@ RSSI:%@", [beacon.uuid UUIDString], beacon.major, beacon.minor, beacon.rssi];
+            //            [self output:message];
+        });
+    }
+}
+
+- (void)proximityKit:(RPKManager *)manager didDetermineState:(RPKRegionState)state forRegion:(RPKBeacon *)region
+{
+    if (state == RPKRegionStateInside) {
+        
+        // Check whether the beacon's room number belongs to this user or not
+        for(NSString *room_number in roomArray)
+        {
+            if([room_number isEqualToString:[region.major stringValue]])
+            {
+                inIbeaconRange = true;
+                if(onThisVC) [userDefaults setObject:room_number forKey:@"current_room"];
+            }
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"CEVC: State Changed: inside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+            [self output:message];
+            NSLog(@"%@",message);
+        });
+        
+    } else if (state == RPKRegionStateOutside) {
+        
+        // Check whether the user is getting out of the current room or not
+        NSString *current_room = [userDefaults objectForKey:@"current_room"];
+        if([current_room isEqualToString:[region.major stringValue]])
+        {
+            inIbeaconRange = false;
+            if(onThisVC) [userDefaults setObject:@"" forKey:@"current_room"];
+        }
+
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"CEVC: State Changed: outside region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+            [self output:message];
+            NSLog(@"%@",message);
+        });
+    } else if (state == RPKRegionStateUnknown) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSString *message = [NSString stringWithFormat:@"CEVC: State Changed: unknown region %@ (%@) AT TIME:%@", region.name, region.identifier, [self getCurrentTimeString]];
+            [self output:message];
+            NSLog(@"%@",message);
+        });
+    }
+}
+
+- (void)proximityKit:(RPKManager *)manager didFailWithError:(NSError *)error
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSString *message = [NSString stringWithFormat:@"CEVC: Error: %@ AT TIME:%@", error.description,[self getCurrentTimeString]];
+        [self output:message];
+        NSLog(@"%@", message);
+    });
+}
 
 #pragma mark - Button Pressed Methods
 - (IBAction)jcdButtonPressed:(UIButton *)sender {
+    [self.RPKmanager stop];
+    onThisVC = false;
     [self performSegueWithIdentifier:@"ChooseToJustCollectData" sender:self];
 }
 
 - (IBAction)hvacButtonPressed:(UIButton *)sender {
-    [self performSegueWithIdentifier:@"ChooseToHVACControl" sender:self];
+    [userDefaults setBool:true forKey:@"isHVAC"];
+    
+    if(inIbeaconRange)
+    {
+        [self.RPKmanager stop];
+        onThisVC = false;
+        [self performSegueWithIdentifier:@"ChooseToHVACControl" sender:self];
+    }
 }
 
 - (IBAction)logoutButtonPressed:(UIBarButtonItem *)sender {
@@ -185,12 +329,47 @@
 
     isFromLogout = TRUE;
     
+    [self.RPKmanager stop];
     [[MSBClientManager sharedManager] cancelClientConnection:self.client];
     
     NSLog(@"roomArray: %@",roomArray);
 
     [self.navigationController dismissViewControllerAnimated:TRUE completion:nil];
-    
+}
+
+#pragma mark - helper method, log information to the TextView console in the app
+
+- (void)output:(NSString *)message
+{
+    self.SKTTxtOutput.text = [NSString stringWithFormat:@"%@\n%@", self.SKTTxtOutput.text, message];
+    CGPoint p = [self.SKTTxtOutput contentOffset];
+    [self.SKTTxtOutput setContentOffset:p animated:NO];
+    [self.SKTTxtOutput scrollRangeToVisible:NSMakeRange([self.SKTTxtOutput.text length], 0)];
+}
+
+#pragma mark Helper method to get the current time string
+
+- (NSString *)getCurrentTimeString
+{
+    NSDate *currentTime = [NSDate date];
+    // Convert the time to local time zone
+    NSTimeInterval timeZoneSeconds = [[NSTimeZone localTimeZone] secondsFromGMT];
+    currentTime = [currentTime dateByAddingTimeInterval:timeZoneSeconds];
+    NSString *currentTimeString = [NSString stringWithFormat:@"%@",currentTime];
+    return currentTimeString;
+}
+
+# pragma mark - Alert view delegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if([alertView.title isEqualToString:@"Confirm"])
+    {
+        if(buttonIndex == 1)
+        {
+            [self.RPKmanager stop];
+            [self performSegueWithIdentifier:@"ChooseToHVACControl" sender:self];
+        }
+    }
 }
 
 @end

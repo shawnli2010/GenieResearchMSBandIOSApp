@@ -23,17 +23,20 @@
 
 #import <UIKit/UIKit.h>
 #import <ProximityKit/ProximityKit.h>
+#import <CoreLocation/CoreLocation.h>
 
 #import <MicrosoftBandKit_iOS/MicrosoftBandKit_iOS.h>
 #import "KeychainItemWrapper.h"
 #import "MBProgressHUD.h"
 
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate,RPKManagerDelegate,CLLocationManagerDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 @property (nonatomic, weak) MSBClient *client;
 @property (nonatomic, strong) MBProgressHUD *hud;
+//@property (nonatomic, strong) CLLocationManager *locationManager;
+@property (strong, nonatomic) RPKManager *RPKmanager;
 
 
 

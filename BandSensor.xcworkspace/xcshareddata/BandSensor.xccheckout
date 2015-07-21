@@ -10,14 +10,14 @@
 	<string>BandSensor</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>92D16FBBA46E375359A37B7BF62DB87DE806FDFB</key>
+		<key>31B01BC76FC3765883F5729D9CA6EB345A3BB19D</key>
 		<string>https://github.com/shawnli2010/GenieResearchMSBandIOSApp.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
 	<string>BandSensor.xcworkspace</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>92D16FBBA46E375359A37B7BF62DB87DE806FDFB</key>
+		<key>31B01BC76FC3765883F5729D9CA6EB345A3BB19D</key>
 		<string>..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
@@ -25,14 +25,14 @@
 	<key>IDESourceControlProjectVersion</key>
 	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>92D16FBBA46E375359A37B7BF62DB87DE806FDFB</string>
+	<string>31B01BC76FC3765883F5729D9CA6EB345A3BB19D</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>92D16FBBA46E375359A37B7BF62DB87DE806FDFB</string>
+			<string>31B01BC76FC3765883F5729D9CA6EB345A3BB19D</string>
 			<key>IDESourceControlWCCName</key>
 			<string>BandSensor</string>
 		</dict>

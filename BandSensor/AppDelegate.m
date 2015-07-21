@@ -24,9 +24,10 @@
 #import "AppDelegate.h"
 
 // declare global variable for push notification recurrence minutes
-BOOL pushNotificationIsOn;
-BOOL pushNotificationAlreadyOn;
 BOOL isFromLogout;
+BOOL inIbeaconRange;
+
+NSMutableArray *roomArray;
 
 @interface AppDelegate ()
 
@@ -38,9 +39,15 @@ BOOL isFromLogout;
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     
-    pushNotificationAlreadyOn = false;
-    pushNotificationIsOn = false;
+//    self.locationManager = [[CLLocationManager alloc] init];
+//    self.locationManager.delegate = self;
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+    
     isFromLogout = false;
+    inIbeaconRange = false;
+    
+//    self.RPKmanager = [RPKManager managerWithDelegate:self];
+//    [self.RPKmanager start];
     
     if ([UIApplication instancesRespondToSelector:@selector(registerUserNotificationSettings:)])
     {
@@ -49,13 +56,7 @@ BOOL isFromLogout;
                                            categories:nil]];
     }
     
-    /************************************************************************/
-//    KeychainItemWrapper* keychain = [[KeychainItemWrapper alloc] initWithIdentifier:@"Keychain" accessGroup:nil];
-//    [keychain setObject:(__bridge id)(kSecAttrAccessibleWhenUnlocked) forKey:(__bridge id)(kSecAttrAccessible)];
-//    NSString *username = [keychain objectForKey:(__bridge id)(kSecAttrAccount)];
-//    NSString *password = [keychain objectForKey:(__bridge id)(kSecValueData)];
-//    keychain = nil;
-    /************************************************************************/
+    [userDefaults setObject:@"" forKey:@"current_room"];
 
     return YES;
 }
@@ -81,6 +82,62 @@ BOOL isFromLogout;
 - (void)applicationWillTerminate:(UIApplication *)application {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
+
+#pragma mark Helper method to get the current time string
+
+- (NSString *)getCurrentTimeString
+{
+    NSDate *currentTime = [NSDate date];
+    // Convert the time to local time zone
+    NSTimeInterval timeZoneSeconds = [[NSTimeZone localTimeZone] secondsFromGMT];
+    currentTime = [currentTime dateByAddingTimeInterval:timeZoneSeconds];
+    NSString *currentTimeString = [NSString stringWithFormat:@"%@",currentTime];
+    return currentTimeString;
+}
+
+#pragma mark Proximity Kit Delegate Methods
+
+//- (void)proximityKit:(RPKManager *)manager didDetermineState:(RPKRegionState)state forRegion:(RPKRegion *)region
+//{
+//    UILocalNotification *notification = [[UILocalNotification alloc] init];
+//    notification.soundName = UILocalNotificationDefaultSoundName;
+//    
+//    if (state == RPKRegionStateInside)
+//    {
+//        notification.alertBody = [NSString stringWithFormat:@"You are inside state"];
+//    }
+//    else if (state == RPKRegionStateOutside)
+//    {
+//        notification.alertBody = [NSString stringWithFormat:@"You are outside of state"];
+//    }
+//    else if (state == RPKRegionStateUnknown)
+//    {
+//        notification.alertBody = [NSString stringWithFormat:@"Unknown state"];
+//    }
+//    
+//    [[UIApplication sharedApplication] presentLocalNotificationNow:notification];
+//}
+
+//-(void)locationManager:(CLLocationManager *)manager didDetermineState:(CLRegionState)state forRegion:(CLRegion *)region{
+//    
+//    UILocalNotification *notification = [[UILocalNotification alloc] init];
+//    notification.soundName = UILocalNotificationDefaultSoundName;
+//    
+//    if(state == CLRegionStateInside)
+//    {
+//        notification.alertBody = [NSString stringWithFormat:@"You are inside region %@", region.identifier];
+//    }
+//    else if(state == CLRegionStateOutside)
+//    {
+//        notification.alertBody = [NSString stringWithFormat:@"You are outside region %@", region.identifier];
+//    }
+//    else
+//    {
+//        return;
+//    }
+//    
+//    [[UIApplication sharedApplication] presentLocalNotificationNow:notification];
+//}
 
 
 @end

@@ -21,6 +21,7 @@
 		4231D3A01B4CB22B006CE54D /* CollectDataViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4231D39F1B4CB22B006CE54D /* CollectDataViewController.m */; };
 		4231D3A31B4D9FBC006CE54D /* CollectDataSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4231D3A21B4D9FBC006CE54D /* CollectDataSettingViewController.m */; };
 		42BA43D21B093ECE00F13EF6 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = 42BA43D11B093ECE00F13EF6 /* MBProgressHUD.m */; };
+		42C0BC8A1B5C5D69003F69ED /* HVACSettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 42C0BC891B5C5D69003F69ED /* HVACSettingViewController.m */; };
 		42FFA7331B59C12E0095CED4 /* MicrosoftBandKit_iOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42FFA7321B59C12E0095CED4 /* MicrosoftBandKit_iOS.framework */; };
 		5F598E4F1AA635E80071C70E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F598E4E1AA635E80071C70E /* main.m */; };
 		5F598E521AA635E80071C70E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F598E511AA635E80071C70E /* AppDelegate.m */; };
@@ -55,6 +56,8 @@
 		4231D3A21B4D9FBC006CE54D /* CollectDataSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CollectDataSettingViewController.m; sourceTree = "<group>"; };
 		42BA43D01B093ECE00F13EF6 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		42BA43D11B093ECE00F13EF6 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
+		42C0BC881B5C5D69003F69ED /* HVACSettingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HVACSettingViewController.h; sourceTree = "<group>"; };
+		42C0BC891B5C5D69003F69ED /* HVACSettingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HVACSettingViewController.m; sourceTree = "<group>"; };
 		42FFA7321B59C12E0095CED4 /* MicrosoftBandKit_iOS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MicrosoftBandKit_iOS.framework; sourceTree = "<group>"; };
 		5F598E491AA635E80071C70E /* BandSensor.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BandSensor.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F598E4D1AA635E80071C70E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -145,6 +148,8 @@
 				422528821B56F916000CDDB5 /* ChooseExperimentViewController.m */,
 				4205EF4D1B000AF200DB0D37 /* HVACControllViewController.h */,
 				4205EF4E1B000AF200DB0D37 /* HVACControllViewController.m */,
+				42C0BC881B5C5D69003F69ED /* HVACSettingViewController.h */,
+				42C0BC891B5C5D69003F69ED /* HVACSettingViewController.m */,
 				4231D39E1B4CB22B006CE54D /* CollectDataViewController.h */,
 				4231D39F1B4CB22B006CE54D /* CollectDataViewController.m */,
 				4231D3A11B4D9FBC006CE54D /* CollectDataSettingViewController.h */,
@@ -303,6 +308,7 @@
 				42BA43D21B093ECE00F13EF6 /* MBProgressHUD.m in Sources */,
 				5F598E521AA635E80071C70E /* AppDelegate.m in Sources */,
 				5F598E4F1AA635E80071C70E /* main.m in Sources */,
+				42C0BC8A1B5C5D69003F69ED /* HVACSettingViewController.m in Sources */,
 				422528831B56F916000CDDB5 /* ChooseExperimentViewController.m in Sources */,
 				4231D3A01B4CB22B006CE54D /* CollectDataViewController.m in Sources */,
 			);

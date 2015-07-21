@@ -8,12 +8,14 @@
 
 #import "CollectDataViewController.h"
 
-@interface CollectDataViewController ()
+@interface CollectDataViewController () <UIAlertViewDelegate>
 {
     NSMutableArray *feelArray;
     UIPickerView *feelPicker;
     int feelInt;
-    
+ 
+    BOOL willSendFeeling;
+    NSUserDefaults *userDefaults;
 }
 @end
 
@@ -22,15 +24,20 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    [self.SKTTxtOutput setHidden:false];
+    willSendFeeling = false;
+    userDefaults = [NSUserDefaults standardUserDefaults];
+    
+    [self.SKTTxtOutput setHidden:true];
     [self.currentSkinTempLabel setHidden:true];
     [self.dataRecordingTimeLabel setHidden:true];
+    [self.lastFeelingLabel setHidden:true];
     
     //keyboard disappear when tapping outside of text field
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissKeyboard)];
     [self.view addGestureRecognizer:tap];
     
     feelArray = [[NSMutableArray alloc] init];
+    [feelArray addObject:@""];    
     [feelArray addObject:@"GOOD"];
     [feelArray addObject:@"HOT"];
     [feelArray addObject:@"WARM"];
@@ -61,6 +68,8 @@
                                               otherButtonTitles:nil];
         [alert show];
     }
+    
+    [self.chooseFeelTextField setBorderStyle:UITextBorderStyleLine];
 }
 
 
@@ -76,7 +85,7 @@
     [self.client.sensorManager startSkinTempUpdatesToQueue:nil errorRef:nil withHandler:^(MSBSensorSkinTempData *skinTemperatureData, NSError *error) {
         
         //Check whether the user have changed their settings of reminder notification
-        if(pushNotificationIsOn && !pushNotificationAlreadyOn)
+        if( [userDefaults boolForKey:@"pushNotificationIsOn"] && ![userDefaults boolForKey:@"pushNotificationAlreadyOn"])
         {
             NSDate *currentTime = [NSDate date];;
             UILocalNotification *localNotification = [[UILocalNotification alloc] init];
@@ -87,9 +96,9 @@
             localNotification.repeatInterval = NSCalendarUnitHour;
             [[UIApplication sharedApplication] scheduleLocalNotification:localNotification];
             
-            pushNotificationAlreadyOn = true;
+            [userDefaults setBool:true forKey:@"pushNotificationAlreadyOn"];
         }
-        else if(!pushNotificationIsOn)
+        else if(![userDefaults boolForKey:@"pushNotificationIsOn"])
         {
             // Delete all the previous notifications
             UIApplication *app = [UIApplication sharedApplication];
@@ -100,7 +109,7 @@
                 [app cancelLocalNotification:eventArray[i]];
             }
             
-            pushNotificationAlreadyOn = false;
+            [userDefaults setBool:false forKey:@"pushNotificationAlreadyOn"];
         }
         
         // Convert c to f
@@ -136,10 +145,11 @@
          }];
         
         /*************************** Post data to Genie persistent skin temperature database, testing purpose only ***************************/
-        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":self.roomArray[0], @"feeling":[NSNumber numberWithInt:feelInt]}
+        [self.AFManager POST:@"https://genie.ucsd.edu/api/v1/users/persistskintemperature" parameters:@{@"skin_temperature": tempString, @"room":roomArray[0], @"feeling":[NSNumber numberWithInt:feelInt]}
                 success:^(AFHTTPRequestOperation *operation, id responseObject)
          {
              NSLog(@"Success: %@",responseObject);
+             willSendFeeling = false;
          }
                 failure:^(AFHTTPRequestOperation *operation, NSError *error)
          {
@@ -198,9 +208,11 @@
 {    
     [self.chooseFeelTextField resignFirstResponder];
     
+    willSendFeeling = true;
+    
     if([self.chooseFeelTextField.text isEqualToString:@""])
     {
-        feelInt = -1;
+        feelInt = 100;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"GOOD"])
     {
@@ -208,11 +220,11 @@
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"WARM"])
     {
-        feelInt = 1;
+        feelInt = 2;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"SLIGHTLY WARM"])
     {
-        feelInt = 2;
+        feelInt = 1;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"HOT"])
     {
@@ -220,25 +232,21 @@
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"SLIGHTLY COOL"])
     {
-        feelInt = 4;
+        feelInt = -1;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"COOL"])
     {
-        feelInt = 5;
+        feelInt = -2;
     }
     else if([self.chooseFeelTextField.text isEqualToString:@"COLD"])
     {
-        feelInt = 6;
+        feelInt = -3;
     }
     
-    NSString *alertMessage = [@"You just set your feeling to " stringByAppendingString:self.chooseFeelTextField.text];
+    [self.lastFeelingLabel setHidden:false];
+    [self.lastFeelingLabel setText:self.chooseFeelTextField.text];
     
-    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Success"
-                                                    message:alertMessage
-                                                   delegate:nil
-                                          cancelButtonTitle:@"OK"
-                                          otherButtonTitles:nil];
-    [alert show];
+    [self.chooseFeelTextField setText:@""];
 }
 
 /*************************************************************************************/
@@ -282,8 +290,25 @@
 }
 
 - (IBAction)backButtonPressed:(UIBarButtonItem *)sender {
-    [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
-    [self.navigationController popViewControllerAnimated:TRUE];
+    UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Confirm"
+                                                    message:@"Go back to experiments choosing page will stop skin temperature detecting, are your sure you want to go back?"
+                                                   delegate:self
+                                          cancelButtonTitle:@"Cancel"
+                                          otherButtonTitles:@"Yes", nil];
+    [alert show];
+}
+
+# pragma mark - Alert view delegate
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex
+{
+    if([alertView.title isEqualToString:@"Confirm"])
+    {
+        if(buttonIndex == 1)
+        {
+            [self.client.sensorManager stopSkinTempUpdatesErrorRef:nil];
+            [self.navigationController popViewControllerAnimated:TRUE];
+        }
+    }
 }
 
 @end
